@@ -14,6 +14,7 @@
 import { Menu, Button } from "antd";
 import { NavLink, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
+import KhoK3 from "../../pages/KhoK3";
 
 function Sidenav({ color }) {
   const { pathname } = useLocation();
@@ -179,6 +180,19 @@ function Sidenav({ color }) {
               {dashboard}
             </span>
             <span className="label">Dashboard</span>
+          </NavLink>
+        </Menu.Item>
+        <Menu.Item key="1">
+          <NavLink to="/KhoK3">
+            <span
+              className="icon"
+              style={{
+                background: page === "KhoK3" ? color : "",
+              }}
+            >
+              {dashboard}
+            </span>
+            <span className="label">KhoK3</span>
           </NavLink>
         </Menu.Item>
         <Menu.Item key="2">

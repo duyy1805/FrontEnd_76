@@ -15,6 +15,7 @@ import { Typography, Table, Modal, Row, Col, Card } from "antd";
 import { MinusOutlined } from "@ant-design/icons";
 import axios from 'axios';
 import lineChart from "./configs/lineChart";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "../../assets/styles/Style.css"
 
 function LineChart() {
@@ -38,21 +39,23 @@ function LineChart() {
       title: 'Tầng',
       dataIndex: 'floor',
       key: 'floor',
-      width: '16%',
+      width: '60px',
+      // fixed: 'left',
       render: (floor) => (
         <div style={{
-          padding: '8px',
+          // padding: '8px',
           textAlign: 'center',
-          fontWeight: 'bold',
+          // fontWeight: 'bold',
         }}>
           {floor}
         </div>
       ),
     },
-    ...Array.from({ length: 5 }, (_, i) => ({
+    ...Array.from({ length: 40 }, (_, i) => ({
       title: `${i + 1}`,
       dataIndex: ['values', i],
       key: `col${i + 1}`,
+      width: '20px',
       render: (value, record) => {
         // Xác định className dựa trên giá trị `record.percent[i]`
         const className = record.percent[i] > 85
@@ -65,18 +68,16 @@ function LineChart() {
 
         return (
           <div className={className} style={{
-            padding: '10px', // Điều chỉnh padding cho phù hợp
+            // padding: '10px', // Điều chỉnh padding cho phù hợp
             textAlign: 'center',
-            fontSize: '14px',
+            fontSize: '4px',
           }}
             onClick={() => handleClick(record.percent[i])} // Sử dụng sự kiện onClick
           >
             {value}
-
           </div>
         );
       },
-      width: '12%',
     })),
   ];
 
@@ -173,42 +174,48 @@ function LineChart() {
         </div>
       </div>
       <div className="Layout_Kho" style={{ width: '100%', maxHeight: 500, overflowY: 'auto', flexGrow: 1 }}>
-        <div style={{ width: '100%', marginRight: 20 }}>
-          {groupedData.map((group, index) => (
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Card>
-                <div>
-                  <h2 style={{ margin: "0px 10px", fontWeight: 'bold' }}>
-                    {group[0].rowTitle}
-                  </h2>
+        <TransformWrapper >
+          <TransformComponent >
+            <div style={{ width: '950px', height: '100%', marginRight: 10, marginTop: 20 }}>
+              {groupedData.map((group, index) => (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Card>
+                    <div>
+                      <div style={{ margin: "0px 0px", fontWeight: 'bold', fontSize: 10 }}>
+                        {group[0].rowTitle}
+                      </div>
+                    </div>
+                  </Card>
+                  <Table
+                    key={index}
+                    columns={columns}
+                    dataSource={group}
+                    pagination={false}
+                    // bordered
+                    borderColor='#000'
+                    showHeader={false}
+                    style={{
+                      marginBottom: '12px',
+                      width: '91%',
+                      overflowY: 'auto',
+                      overflowX: 'hidden'
+                    }}
+                    className="custom-table"
+                    tableLayout='fixed'
+                  />
+                  <Modal
+                    title="Thông tin Key"
+                    visible={isModalVisible}
+                    onCancel={handleModalClose}
+                    onOk={handleModalClose}
+                  >
+                    <p>Phần trăm: {selectedKey}</p>
+                  </Modal>
                 </div>
-              </Card>
-              <Table
-                key={index}
-                columns={columns}
-                dataSource={group}
-                pagination={false}
-                // bordered
-                borderColor='#000'
-                showHeader={false}
-                style={{
-                  marginBottom: '12px',
-                  width: '80%',
-                  overflowY: 'auto'
-                }}
-                className="custom-table"
-              />
-              <Modal
-                title="Thông tin Key"
-                visible={isModalVisible}
-                onCancel={handleModalClose}
-                onOk={handleModalClose}
-              >
-                <p>Phần trăm: {selectedKey}</p>
-              </Modal>
+              ))}
             </div>
-          ))}
-        </div>
+          </TransformComponent>
+        </TransformWrapper>
         {/* <ReactApexChart
         className="full-width"
         options={lineChart.options}
@@ -217,7 +224,7 @@ function LineChart() {
         height={350}
         width={"100%"}
       /> */}
-      </div>
+      </div >
     </>
   );
 }

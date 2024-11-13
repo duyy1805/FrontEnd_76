@@ -1,8 +1,8 @@
 .ant-table-wrapper .ant-table {
-    font-size: 16px;
+    font-size: 8px;
     font-weight: bold;
     border-radius: 0;
-    color: #4343ff;
+    /* color: #4343ff; */
     /* background-color: antiquewhite; */
 }
 
@@ -15,11 +15,14 @@
 /* Thêm border 1px cho các ô trong bảng */
 .ant-table-tbody>tr>td {
     border: 1px solid #000;
-    padding: 0 !important;
-    border-bottom: 0px solid #f0f0f0;
+    /* padding: 0 !important; */
+    /* border-bottom: 0px solid #f0f0f0; */
     /* Màu sắc border */
 }
 
+.ant-table-thead>tr>th {
+    /* border: 1px solid #000; */
+}
 
 .ant-table-wrapper .ant-table.ant-table-bordered>.ant-table-container {
     border-inline-start: 0px;
@@ -32,6 +35,7 @@
     color: blue;
 }
 
+.yellow-background,
 .green-background,
 .red-background,
 .white-background {
@@ -58,7 +62,7 @@
 
 .yellow-background {
     background-color: #fcff4dc4;
-    color: rgb(0, 0, 0);
+    color: black;
 }
 
 .red-background {
@@ -89,4 +93,14 @@
 .Layout_Kho {
     display: flex;
     width: '100%';
+}
+
+
+
+.layoutkho {
+    font-size: 2px;
+}
+
+.Layout_Kho .ant-table .ant-table-cell {
+    padding: 6px 0;
 }

@@ -33,7 +33,7 @@ import Paragraph from "antd/lib/typography/Paragraph";
 
 import Echart from "../components/chart/EChart";
 import LineChart from "../components/chart/LineChart";
-import KhoN1 from "../components/chart/KhoN1";
+import KhoK3 from "../components/chart/KhoK3";
 
 import ava1 from "../assets/images/logo-shopify.svg";
 import ava2 from "../assets/images/logo-atlassian.svg";
@@ -47,7 +47,7 @@ import team3 from "../assets/images/team-3.jpg";
 import team4 from "../assets/images/team-4.jpg";
 import card from "../assets/images/info-card-1.jpg";
 
-function Home() {
+function KhoK3_() {
   const { Title, Text } = Typography;
 
   const onChange = (e) => console.log(`radio checked:${e.target.value}`);
@@ -344,51 +344,10 @@ function Home() {
   return (
     <>
       <div className="layout-content">
-        <Row className="rowgap-vbox" gutter={[24, 0]}>
-          {count.map((c, index) => (
-            <Col
-              key={index}
-              xs={24}
-              sm={24}
-              md={12}
-              lg={6}
-              xl={6}
-              className="mb-24"
-            >
-              <Card bordered={false} className="criclebox ">
-                <div className="number">
-                  <Row align="middle" gutter={[24, 0]}>
-                    <Col xs={18}>
-                      <span>{c.today}</span>
-                      <Title level={3}>
-                        {c.title} <small className={c.bnb}>{c.persent}</small>
-                      </Title>
-                    </Col>
-                    <Col xs={6}>
-                      <div className="icon-box">{c.icon}</div>
-                    </Col>
-                  </Row>
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
 
-        <Row gutter={[24, 0]}>
+        <KhoK3 />
 
-          <Col xs={24} sm={24} md={12} lg={12} xl={18} className="mb-24">
-            <Card bordered={false} className="criclebox h-full">
-              <LineChart />
-            </Card>
-          </Col>
-          <Col xs={24} sm={24} md={12} lg={12} xl={6} className="mb-24">
-            <Card bordered={false} className="criclebox h-full">
-              <Echart />
-            </Card>
-          </Col>
-        </Row>
-
-        <Row gutter={[24, 0]}>
+        {/* <Row gutter={[24, 0]}>
           <Col xs={24} sm={24} md={12} lg={12} xl={16} className="mb-24">
             <Card bordered={false} className="criclebox cardbody h-full">
               <div className="project-ant">
@@ -554,10 +513,10 @@ function Home() {
               </div>
             </Card>
           </Col>
-        </Row>
+        </Row> */}
       </div>
     </>
   );
 }
 
-export default Home;
+export default KhoK3_;
