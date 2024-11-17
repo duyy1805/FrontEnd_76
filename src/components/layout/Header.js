@@ -292,13 +292,13 @@ function Header({
             </span>
           </div>
         </Col>
-        <Col span={24} md={18} className="header-control">
+        {/* <Col span={24} md={18} className="header-control">
           <Input
             className="header-search"
             placeholder="Type here..."
             prefix={<SearchOutlined />}
           />
-        </Col>
+        </Col> */}
       </Row>
     </>
   );

@@ -165,7 +165,7 @@ function Sidenav({ color }) {
     <>
       <div className="brand">
         <img src={logo} alt="" />
-        <span>Muse Dashboard</span>
+        <span>Layout kho</span>
       </div>
       <hr />
       <Menu theme="light" mode="inline">
@@ -192,7 +192,7 @@ function Sidenav({ color }) {
             >
               {dashboard}
             </span>
-            <span className="label">KhoK3</span>
+            <span className="label">Kho K3</span>
           </NavLink>
         </Menu.Item>
         <Menu.Item key="2">
@@ -263,7 +263,7 @@ function Sidenav({ color }) {
           </NavLink>
         </Menu.Item>
       </Menu>
-      <div className="aside-footer">
+      {/* <div className="aside-footer">
         <div
           className="footer-box"
           style={{
@@ -279,7 +279,7 @@ function Sidenav({ color }) {
             DOCUMENTATION
           </Button>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

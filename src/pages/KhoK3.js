@@ -31,8 +31,8 @@ import {
 } from "@ant-design/icons";
 import Paragraph from "antd/lib/typography/Paragraph";
 
-import Echart from "../components/chart/EChart";
-import LineChart from "../components/chart/LineChart";
+// import Echart from "../components/chart/EChart";
+// import LineChart from "../components/chart/LineChart";
 import KhoK3 from "../components/chart/KhoK3";
 
 import ava1 from "../assets/images/logo-shopify.svg";

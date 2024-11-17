@@ -49,7 +49,7 @@
     /* Căn giữa theo chiều dọc */
     justify-content: center;
     /* Căn giữa theo chiều ngang */
-    padding: 8px;
+    padding: 6px;
     /* Padding cho nội dung */
     box-sizing: border-box;
     /* Đảm bảo padding không làm ảnh hưởng đến kích thước */
@@ -82,7 +82,7 @@
 } */
 
 .ant-modal-mask {
-    background-color: rgba(0, 0, 0, 0.1) !important;
+    background-color: rgba(0, 0, 0, 0.8);
     /* Điều chỉnh màu và opacity của lớp phủ */
 }
 

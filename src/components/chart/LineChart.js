@@ -51,7 +51,7 @@ function LineChart() {
         </div>
       ),
     },
-    ...Array.from({ length: 40 }, (_, i) => ({
+    ...Array.from({ length: 5 }, (_, i) => ({
       title: `${i + 1}`,
       dataIndex: ['values', i],
       key: `col${i + 1}`,
@@ -70,7 +70,7 @@ function LineChart() {
           <div className={className} style={{
             // padding: '10px', // Điều chỉnh padding cho phù hợp
             textAlign: 'center',
-            fontSize: '4px',
+            fontSize: '10px',
           }}
             onClick={() => handleClick(record.percent[i])} // Sử dụng sự kiện onClick
           >
@@ -94,7 +94,6 @@ function LineChart() {
             MaVung: "A"
           }
         });
-        console.log(response)
         const positions = response.data.map(item => item.MaViTriKho);
         const percent = response.data.map(item => item.PhanTram);
         // Lưu dữ liệu vào state
@@ -143,7 +142,7 @@ function LineChart() {
       percent: percents.slice(j * 5, j * 5 + 5), // Lấy phần tương ứng từ percents
     }))
   );
-
+  console.log(groupedDataByRowTitle)
   // Chia tableData thành các nhóm 3 hàng
   const groupedData = Array.from({ length: Math.ceil(tableData.length / 3) }, (_, i) =>
     tableData.slice(i * 3, i * 3 + 3)
