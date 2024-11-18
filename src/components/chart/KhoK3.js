@@ -11,7 +11,7 @@
 */
 import React, { useState, useEffect, useRef } from 'react';
 import ReactApexChart from "react-apexcharts";
-import { Typography, Table, Modal, Row, Col, Card, Input } from "antd";
+import { Typography, Table, Modal, Row, Col, Card, Input, Button } from "antd";
 import {
   MinusOutlined, SearchOutlined,
   StarOutlined,
@@ -44,102 +44,7 @@ const callAPILayoutKho_BTP = async () => {
   }
 }
 
-const callAPISearch_ = async () => {
-  try {
-    // Gửi yêu cầu GET tới API
-    const response = await axios.get('http://localhost:5000/api/khoBTP/search', {
-      params: {
-        So_LenhXUATVT: "LXVT-2024-10-0288", // Truyền tham số nếu cần
-        Ma_Vattu: '',
-      }
-    });
-    return (response)
-  } catch (error) {
-    console.error('Lỗi khi lấy dữ liệu:', error);
-  }
-}
 
-
-const array_ = Array.from({ length: 600 }, (_, index) => {
-  const value = index + 100;
-  const code = `A${value}`;
-  const discount = Math.floor(Math.random() * 600);
-  return { code, discount };
-});
-
-
-// Lọc các phần tử với code nằm trong các khoảng cụ thể
-const array = array_.filter(item => {
-  const value = parseInt(item.code.slice(1), 10); // Lấy giá trị sau chữ 'A'
-
-  // Kiểm tra nếu giá trị nằm trong các khoảng mong muốn
-  return (
-    (value >= 100 && value <= 179) ||
-    (value >= 200 && value <= 279) ||
-    (value >= 300 && value <= 379) ||
-    (value >= 400 && value <= 479) ||
-    (value >= 500 && value <= 579) ||
-    (value >= 600 && value <= 679)
-  );
-});
-
-const countDiscounts = (arr) => {
-  const countLessThan100 = arr.filter(item => item.discount < 100).length;
-  const countLessThan200 = arr.filter(item => item.discount < 200).length;
-  const countLessThan300 = arr.filter(item => item.discount < 300).length;
-
-  return [
-    { label: 'Nhỏ hơn 100', value: countLessThan100 },
-    { label: 'Nhỏ hơn 200', value: countLessThan200 - countLessThan100 }, // Trừ bớt các giá trị đã tính ở khoảng trước
-    { label: 'Nhỏ hơn 300', value: countLessThan300 - countLessThan200 }, // Trừ bớt các giá trị đã tính ở khoảng trước
-  ];
-};
-
-const datapie = countDiscounts(array);
-const labels = datapie.map(item => item.label);
-const series = datapie.map(item => item.value);
-
-// Tách 2 chữ cái đầu và nhóm theo chúng
-const groupedData = array.reduce((acc, item) => {
-  const prefix = item.code.slice(0, 2);
-  if (!acc[prefix]) {
-    acc[prefix] = [];
-  }
-  acc[prefix].push(item);
-  return acc;
-}, {});
-
-
-const data_ = groupedData.A1.map((item, index) => ({
-  A1: { code: item.code, discount: item.discount },
-  A2: { code: groupedData.A2[index].code, discount: groupedData.A2[index].discount },
-  A3: { code: groupedData.A3[index].code, discount: groupedData.A3[index].discount },
-  A4: { code: groupedData.A4[index].code, discount: groupedData.A4[index].discount },
-  A5: { code: groupedData.A5[index].code, discount: groupedData.A5[index].discount },
-  A6: { code: groupedData.A6[index].code, discount: groupedData.A6[index].discount },
-}));
-
-const result = [];
-
-for (let index = 0; index < data_.length / 2; index++) {
-  result.push({
-    key: index,
-    values: [
-      data_[index * 2].A1,
-      data_[index * 2 + 1].A1,
-      data_[index * 2].A2,
-      data_[index * 2 + 1].A2,
-      data_[index * 2].A3,
-      data_[index * 2 + 1].A3,
-      data_[index * 2].A4,
-      data_[index * 2 + 1].A4,
-      data_[index * 2].A5,
-      data_[index * 2 + 1].A5,
-      data_[index * 2].A6,
-      data_[index * 2 + 1].A6,
-    ],
-  });
-}
 //Fucntion ở đây
 const KhoK3 = (props) => {
   const tableRef = useRef(null);
@@ -149,7 +54,34 @@ const KhoK3 = (props) => {
   const [selectedKey, setSelectedKey] = useState(null);
   const [data, setData] = useState([]);
   const [inputLenhXuatVT, setInputLenhXuatVT] = useState("");
+  const [inputMaVatTu, setInputMaVatTu] = useState("");
+  const [viTri, setViTri] = useState([]);
 
+
+
+  const callAPISearch_ = async () => {
+    try {
+      // Gửi yêu cầu GET tới API
+      const response = await axios.get('http://localhost:5000/api/khoBTP/search', {
+        params: {
+          So_LenhXUATVT: inputLenhXuatVT, // Truyền tham số nếu cần
+          Ma_Vattu: inputMaVatTu,
+        }
+      });
+      return (response)
+    } catch (error) {
+      console.error('Lỗi khi lấy dữ liệu:', error);
+    }
+  }
+
+
+  const handleInputLenhXuatVTChange = (e) => {
+    setInputLenhXuatVT(e.target.value);
+  };
+
+  const handleInputMaVatTuChange = (e) => {
+    setInputMaVatTu(e.target.value);
+  };
 
   const handleClick = (key) => {
     const key_ = JSON.stringify(key)
@@ -162,19 +94,24 @@ const KhoK3 = (props) => {
     setSelectedKey(null); // Xóa key sau khi đóng modal
   };
 
-  // useEffect(() => {
-  //   if (tableRef.current) {
-  //     tableRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  //   }
-  // }, [result]);
   const [threshold, setThreshold] = useState(null);
 
 
   const handleThresholdChange = (e) => {
     const value = e.target.value;
-    setThreshold(value ? parseInt(value, 10) : null);
+    setThreshold(value);
   };
 
+  const handleSubmit = async () => {
+    try {
+      const response = await callAPISearch_();
+      setViTri(response.data);
+      console.log(response.data);
+    }
+    catch (error) {
+      console.error('Lỗi khi gọi API:', error);
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -190,7 +127,6 @@ const KhoK3 = (props) => {
           MaViTriKho: MaViTriKho,
           PhanTram: PhanTram[index],
         }));
-        console.log(formattedData)
         setData(formattedData);
 
       } catch (error) {
@@ -597,6 +533,9 @@ const KhoK3 = (props) => {
                       : record.PhanTram > 0 && record.PhanTram <= 85
                         ? 'green-background'
                         : 'white-background';
+                  const isHighlighted = viTri.some(
+                    (item) => item.MaViTriKho === record.MaViTriKho
+                  );
                   return (
                     <div
                       className={className}
@@ -605,7 +544,7 @@ const KhoK3 = (props) => {
                         whiteSpace: 'nowrap',
                         textAlign: 'center',
                         fontSize: '8px',
-                        outline: threshold && record.PhanTram === threshold ? '2px solid blue' : threshold === 0 && record.PhanTram === 0 ? '2px solid blue' : 'none',
+                        outline: isHighlighted ? '2px solid blue' : 'none',
                         // backgroundColor: threshold && record.PhanTram === threshold ? 'lightgreen' : 'transparent',
                       }}
                       onClick={() => handleClick(record.PhanTram)}
@@ -632,6 +571,9 @@ const KhoK3 = (props) => {
                       : record.PhanTram > 0 && record.PhanTram <= 85
                         ? 'green-background'
                         : 'white-background';
+                  const isHighlighted = viTri.some(
+                    (item) => item.MaViTriKho === record.MaViTriKho
+                  );
                   return (
                     <div
                       className={className}
@@ -640,7 +582,7 @@ const KhoK3 = (props) => {
                         whiteSpace: 'nowrap',
                         textAlign: 'center',
                         fontSize: '8px',
-                        outline: threshold && record.PhanTram === threshold ? '2px solid blue' : threshold === 0 && record.PhanTram === 0 ? '2px solid blue' : 'none',
+                        outline: isHighlighted ? '2px solid blue' : 'none',
                         // backgroundColor: threshold && record.PhanTram === threshold ? 'lightgreen' : 'transparent',
                       }}
                       onClick={() => handleClick(record.PhanTram)}
@@ -710,53 +652,42 @@ const KhoK3 = (props) => {
   return (
     <>
       <Row className="rowgap-vbox" gutter={[24, 0]}>
-
-        {/* <Col
-          xs={24}
-          sm={24}
-          md={12}
-          lg={6}
-          xl={6}
-          className="mb-24"
-        >
-          <Card bordered={false} className="criclebox ">
-            <div className="number">
-              <Row align="middle" gutter={[24, 0]}>
-                <Col xs={10}>
-                  <span style={{ fontSize: 12 }}>Mã đơn hàng</span>
-                </Col>
-                <Col xs={14}>
-                  <Input
-                    type="text"
-                    placeholder="Nhập số lượng"
-                    onChange={handleThresholdChange}
-                    style={{
-                      borderRadius: 6,
-                      border: '1px solid #d9d9d9',
-                      fill: '#8c8c8c'
-                    }}
-                  />
-                </Col>
-              </Row>
-            </div>
-          </Card>
-        </Col> */}
         <Col
           xs={24}
           sm={24}
           md={12}
-          lg={6}
-          xl={6}
+          lg={12}
+          xl={12}
           className="mb-24"
         >
           <Card bordered={false} className="criclebox ">
-            <Input
-              type="text"
-              placeholder="Lệnh xuất vật tư"
-              onChange={handleThresholdChange}
-              prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
-              style={{ borderRadius: '6px' }}
-            />
+            <Row align="middle" justify="space-around" gutter={[24, 0]}>
+              <Col xs={8}>
+                <Input
+                  type="text"
+                  placeholder="Lệnh xuất vật tư"
+                  value={inputLenhXuatVT}
+                  onChange={handleInputLenhXuatVTChange}
+                  prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
+                  style={{ borderRadius: '6px' }}
+                />
+              </Col>
+              <Col xs={8}>
+                <Input
+                  type="text"
+                  placeholder="Mã vật tư"
+                  value={inputMaVatTu}
+                  onChange={handleInputMaVatTuChange}
+                  prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
+                  style={{ borderRadius: '6px' }}
+                />
+              </Col>
+              <Col xs={6}>
+                <Button type="primary" onClick={handleSubmit} >
+                  Search
+                </Button>
+              </Col>
+            </Row>
           </Card>
         </Col>
       </Row>
