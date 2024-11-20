@@ -2,22 +2,18 @@
     font-size: 8px;
     font-weight: bold;
     border-radius: 0;
-    /* color: #4343ff; */
-    /* background-color: antiquewhite; */
 }
 
 /* Thêm border 1px cho toàn bộ bảng */
 .ant-table {
     border: 1px solid #000;
-    /* Màu sắc border */
+
 }
 
-/* Thêm border 1px cho các ô trong bảng */
+
 .ant-table-tbody>tr>td {
     border: 1px solid #000;
-    /* padding: 0 !important; */
-    /* border-bottom: 0px solid #f0f0f0; */
-    /* Màu sắc border */
+
 }
 
 .ant-table-thead>tr>th {
@@ -29,11 +25,11 @@
     border-top: 0px;
 }
 
-.rowl {
+/* .rowl {
     font-size: 20px;
     font-weight: bold;
     color: blue;
-}
+} */
 
 .yellow-background,
 .green-background,
@@ -75,11 +71,6 @@
     color: black;
 }
 
-/* .Layout_Kho {
-    padding: 4px;
-    margin: 4px;
-    box-shadow: 5px #888888;
-} */
 
 .ant-modal-mask {
     background-color: rgba(0, 0, 0, 0.8);
@@ -103,4 +94,37 @@
 
 .Layout_Kho .ant-table .ant-table-cell {
     padding: 6px 0;
+}
+
+@keyframes blink-glow {
+    0% {
+        outline: 2px solid blue;
+        /* box-shadow: 0 0 5px blue; */
+    }
+
+    50% {
+        outline: 2px solid rgba(0, 0, 255, 0.5);
+        box-shadow: 0 0 15px rgba(0, 0, 255, 0.5);
+    }
+
+    100% {
+        outline: 2px solid blue;
+        /* box-shadow: 0 0 5px blue; */
+    }
+}
+
+.blink-glow {
+    animation: blink-glow 1s ease-in-out infinite;
+}
+
+
+.ant-modal .ant-table {
+    border: 0px;
+
+}
+
+
+.ant-modal .ant-table-tbody>tr>td {
+    border: 0px;
+
 }

@@ -195,7 +195,7 @@ function Sidenav({ color }) {
             <span className="label">Kho K3</span>
           </NavLink>
         </Menu.Item>
-        <Menu.Item key="2">
+        {/* <Menu.Item key="2">
           <NavLink to="/tables">
             <span
               className="icon"
@@ -207,7 +207,7 @@ function Sidenav({ color }) {
             </span>
             <span className="label">Tables</span>
           </NavLink>
-        </Menu.Item>
+        </Menu.Item> */}
         {/* <Menu.Item key="3">
           <NavLink to="/billing">
             <span

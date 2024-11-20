@@ -48,10 +48,11 @@ const callAPILayoutKho_BTP = async () => {
 //Fucntion ở đây
 const KhoK3 = (props) => {
   const tableRef = useRef(null);
-
+  const [scale, setScale] = useState(1);
   //==============useState
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedKey, setSelectedKey] = useState(null);
+  const [selectedMaVT, setSelectedMaVT] = useState([]);
   const [data, setData] = useState([]);
   const [inputLenhXuatVT, setInputLenhXuatVT] = useState("");
   const [inputMaVatTu, setInputMaVatTu] = useState("");
@@ -64,8 +65,8 @@ const KhoK3 = (props) => {
       // Gửi yêu cầu GET tới API
       const response = await axios.get('http://localhost:5000/api/khoBTP/search', {
         params: {
-          So_LenhXUATVT: inputLenhXuatVT, // Truyền tham số nếu cần
-          Ma_Vattu: inputMaVatTu,
+          So_LenhXuatBTP: inputLenhXuatVT, // Truyền tham số nếu cần
+          Itemcode: inputMaVatTu,
         }
       });
       return (response)
@@ -74,7 +75,25 @@ const KhoK3 = (props) => {
     }
   }
 
-
+  const DataMaVT = selectedMaVT.map((item, index) => ({
+    key: index,
+    ItemCode: item.ItemCode,
+    Checkv: item.Checkv,
+  }));
+  const columnsMaVT = [
+    {
+      title: 'Mã vật tư',
+      dataIndex: 'ItemCode',
+      key: 'ItemCode',
+      align: 'center',
+    },
+    // {
+    //   title: 'Trạng thái',
+    //   dataIndex: 'Checkv',
+    //   key: 'Checkv',
+    //   align: 'center',
+    // },
+  ];
   const handleInputLenhXuatVTChange = (e) => {
     setInputLenhXuatVT(e.target.value);
   };
@@ -83,9 +102,10 @@ const KhoK3 = (props) => {
     setInputMaVatTu(e.target.value);
   };
 
-  const handleClick = (key) => {
-    const key_ = JSON.stringify(key)
-    setSelectedKey(key_); // Lưu trữ key của ô được nhấp
+  const handleClick = (key, key2) => {
+    console.log(key2)
+    setSelectedKey(key); // Lưu trữ key của ô được nhấp
+    setSelectedMaVT(key2)
     setIsModalVisible(true); // Hiển thị modal
   };
 
@@ -105,8 +125,18 @@ const KhoK3 = (props) => {
   const handleSubmit = async () => {
     try {
       const response = await callAPISearch_();
+      const map = new Map();
+      const uniqueData = response.data.filter((item) => {
+        const key = `${item.ID_ViTriKho}_${item.MaViTriKho}_${item.ItemCode}`;
+        if (!map.has(key)) {
+          map.set(key, true);
+          return true;
+        }
+        return false;
+      });
+
       setViTri(response.data);
-      console.log(response.data);
+
     }
     catch (error) {
       console.error('Lỗi khi gọi API:', error);
@@ -119,15 +149,44 @@ const KhoK3 = (props) => {
         const response = await callAPILayoutKho_BTP();
         const MaViTriKho = response.data.map(item => item.MaViTriKho);
         const PhanTram = response.data.map(item => item.PhanTram);
-
+        const ItemCode = response.data.map(item => item.ItemCode);
+        const Checkv = response.data.map(item => item.Checkv);
         // Lưu dữ liệu vào state
         const formattedData = MaViTriKho.map((MaViTriKho, index) => ({
           // key: index + 1,
           rowTitle: `Hàng ${MaViTriKho.slice(0, -2)}`, // Tạo rowTitle dựa vào phần đầu (bỏ 2 chữ số cuối)
           MaViTriKho: MaViTriKho,
           PhanTram: PhanTram[index],
+          ItemCode: ItemCode[index],
+          Checkv: Checkv[index]
         }));
-        setData(formattedData);
+        const groupedData = formattedData.reduce((acc, item) => {
+          // Tạo khóa duy nhất dựa vào rowTitle, MaViTriKho, và PhanTram
+          const key = `${item.rowTitle}-${item.MaViTriKho}-${item.PhanTram}`;
+
+          // Nếu nhóm chưa tồn tại, khởi tạo nó
+          if (!acc[key]) {
+            acc[key] = {
+              rowTitle: item.rowTitle,
+              MaViTriKho: item.MaViTriKho,
+              PhanTram: item.PhanTram,
+              ItemCode: [] // Khởi tạo mảng để chứa cả ItemCode và Checkv
+            };
+          }
+
+          // Thêm ItemCode và Checkv vào mảng (nếu chưa tồn tại)
+          const exists = acc[key].ItemCode.some(i => i.ItemCode === item.ItemCode && i.Checkv === item.Checkv);
+          if (!exists) {
+            acc[key].ItemCode.push({ ItemCode: item.ItemCode, Checkv: item.Checkv });
+          }
+
+          return acc;
+        }, {});
+
+        // Chuyển đổi đối tượng thành mảng
+        const finalGroupedData = Object.values(groupedData);
+
+        setData(finalGroupedData);
 
       } catch (error) {
         console.error('Lỗi khi gọi API:', error);
@@ -135,6 +194,30 @@ const KhoK3 = (props) => {
     };
 
     fetchData();
+    const handleResize = () => {
+      if (tableRef.current) {
+        const tableHeight = tableRef.current.offsetHeight; // Lấy chiều cao của table
+        const screenHeight = window.innerHeight; // Lấy chiều cao màn hình
+        const newScale = (screenHeight - 150) / tableHeight; // Tính toán scale
+        setScale(newScale < 1 ? newScale : 1); // Giới hạn scale tối đa là 1
+      }
+    };
+
+    const observer = new MutationObserver(() => {
+      handleResize(); // Gọi resize ngay khi bảng thay đổi DOM
+    });
+
+    if (tableRef.current) {
+      handleResize(); // Gọi ngay lần đầu khi render
+      observer.observe(tableRef.current, { childList: true, subtree: true }); // Theo dõi thay đổi trong bảng
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      observer.disconnect(); // Hủy theo dõi MutationObserver
+    };
   }, [])
 
   const countEqual0 = data.filter(item => item.PhanTram == 0).length;
@@ -179,14 +262,13 @@ const KhoK3 = (props) => {
 
   //=================================================
   const data_A = Object.keys(groupedData).length > 0 && groupedData.A1.map((item, index) => ({
-    A1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram },
-    A2: groupedData.A2 ? { MaViTriKho: groupedData.A2[index]?.MaViTriKho, PhanTram: groupedData.A2[index]?.PhanTram } : null,
-    A3: groupedData.A3 ? { MaViTriKho: groupedData.A3[index]?.MaViTriKho, PhanTram: groupedData.A3[index]?.PhanTram } : null,
-    A4: groupedData.A4 ? { MaViTriKho: groupedData.A4[index]?.MaViTriKho, PhanTram: groupedData.A4[index]?.PhanTram } : null,
-    A5: groupedData.A5 ? { MaViTriKho: groupedData.A5[index]?.MaViTriKho, PhanTram: groupedData.A5[index]?.PhanTram } : null,
-    A6: groupedData.A6 ? { MaViTriKho: groupedData.A6[index]?.MaViTriKho, PhanTram: groupedData.A6[index]?.PhanTram } : null,
+    A1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
+    A2: groupedData.A2 ? { MaViTriKho: groupedData.A2[index]?.MaViTriKho, PhanTram: groupedData.A2[index]?.PhanTram, ItemCode: groupedData.A2[index]?.ItemCode } : null,
+    A3: groupedData.A3 ? { MaViTriKho: groupedData.A3[index]?.MaViTriKho, PhanTram: groupedData.A3[index]?.PhanTram, ItemCode: groupedData.A2[index]?.ItemCode } : null,
+    A4: groupedData.A4 ? { MaViTriKho: groupedData.A4[index]?.MaViTriKho, PhanTram: groupedData.A4[index]?.PhanTram, ItemCode: groupedData.A2[index]?.ItemCode } : null,
+    A5: groupedData.A5 ? { MaViTriKho: groupedData.A5[index]?.MaViTriKho, PhanTram: groupedData.A5[index]?.PhanTram, ItemCode: groupedData.A2[index]?.ItemCode } : null,
+    A6: groupedData.A6 ? { MaViTriKho: groupedData.A6[index]?.MaViTriKho, PhanTram: groupedData.A6[index]?.PhanTram, ItemCode: groupedData.A2[index]?.ItemCode } : null,
   }));
-
   const result_A = [];
   if (data_A) {
 
@@ -211,12 +293,12 @@ const KhoK3 = (props) => {
     }
   }
   const data_B = Object.keys(groupedData).length > 0 && groupedData.B1.map((item, index) => ({
-    B1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram },
-    B2: groupedData.B2 ? { MaViTriKho: groupedData.B2[index]?.MaViTriKho, PhanTram: groupedData.B2[index]?.PhanTram } : null,
-    B3: groupedData.B3 ? { MaViTriKho: groupedData.B3[index]?.MaViTriKho, PhanTram: groupedData.B3[index]?.PhanTram } : null,
-    B4: groupedData.B4 ? { MaViTriKho: groupedData.B4[index]?.MaViTriKho, PhanTram: groupedData.B4[index]?.PhanTram } : null,
-    B5: groupedData.B5 ? { MaViTriKho: groupedData.B5[index]?.MaViTriKho, PhanTram: groupedData.B5[index]?.PhanTram } : null,
-    B6: groupedData.B6 ? { MaViTriKho: groupedData.B6[index]?.MaViTriKho, PhanTram: groupedData.B6[index]?.PhanTram } : null,
+    B1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
+    B2: groupedData.B2 ? { MaViTriKho: groupedData.B2[index]?.MaViTriKho, PhanTram: groupedData.B2[index]?.PhanTram, ItemCode: groupedData.B2[index]?.ItemCode } : null,
+    B3: groupedData.B3 ? { MaViTriKho: groupedData.B3[index]?.MaViTriKho, PhanTram: groupedData.B3[index]?.PhanTram, ItemCode: groupedData.B3[index]?.ItemCode } : null,
+    B4: groupedData.B4 ? { MaViTriKho: groupedData.B4[index]?.MaViTriKho, PhanTram: groupedData.B4[index]?.PhanTram, ItemCode: groupedData.B4[index]?.ItemCode } : null,
+    B5: groupedData.B5 ? { MaViTriKho: groupedData.B5[index]?.MaViTriKho, PhanTram: groupedData.B5[index]?.PhanTram, ItemCode: groupedData.B5[index]?.ItemCode } : null,
+    B6: groupedData.B6 ? { MaViTriKho: groupedData.B6[index]?.MaViTriKho, PhanTram: groupedData.B6[index]?.PhanTram, ItemCode: groupedData.B6[index]?.ItemCode } : null,
   }));
 
   const result_B = [];
@@ -243,12 +325,12 @@ const KhoK3 = (props) => {
     }
   }
   const data_C = Object.keys(groupedData).length > 0 && groupedData.C1.map((item, index) => ({
-    C1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram },
-    C2: groupedData.C2 ? { MaViTriKho: groupedData.C2[index]?.MaViTriKho, PhanTram: groupedData.C2[index]?.PhanTram } : null,
-    C3: groupedData.C3 ? { MaViTriKho: groupedData.C3[index]?.MaViTriKho, PhanTram: groupedData.C3[index]?.PhanTram } : null,
-    C4: groupedData.C4 ? { MaViTriKho: groupedData.C4[index]?.MaViTriKho, PhanTram: groupedData.C4[index]?.PhanTram } : null,
-    C5: groupedData.C5 ? { MaViTriKho: groupedData.C5[index]?.MaViTriKho, PhanTram: groupedData.C5[index]?.PhanTram } : null,
-    C6: groupedData.C6 ? { MaViTriKho: groupedData.C6[index]?.MaViTriKho, PhanTram: groupedData.C6[index]?.PhanTram } : null,
+    C1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
+    C2: groupedData.C2 ? { MaViTriKho: groupedData.C2[index]?.MaViTriKho, PhanTram: groupedData.C2[index]?.PhanTram, ItemCode: groupedData.C2[index]?.ItemCode } : null,
+    C3: groupedData.C3 ? { MaViTriKho: groupedData.C3[index]?.MaViTriKho, PhanTram: groupedData.C3[index]?.PhanTram, ItemCode: groupedData.C3[index]?.ItemCode } : null,
+    C4: groupedData.C4 ? { MaViTriKho: groupedData.C4[index]?.MaViTriKho, PhanTram: groupedData.C4[index]?.PhanTram, ItemCode: groupedData.C4[index]?.ItemCode } : null,
+    C5: groupedData.C5 ? { MaViTriKho: groupedData.C5[index]?.MaViTriKho, PhanTram: groupedData.C5[index]?.PhanTram, ItemCode: groupedData.C5[index]?.ItemCode } : null,
+    C6: groupedData.C6 ? { MaViTriKho: groupedData.C6[index]?.MaViTriKho, PhanTram: groupedData.C6[index]?.PhanTram, ItemCode: groupedData.C6[index]?.ItemCode } : null,
   }));
 
   const result_C = [];
@@ -275,12 +357,12 @@ const KhoK3 = (props) => {
     }
   }
   const data_D = Object.keys(groupedData).length > 0 && groupedData.D1.map((item, index) => ({
-    D1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram },
-    D2: groupedData.D2 ? { MaViTriKho: groupedData.D2[index]?.MaViTriKho, PhanTram: groupedData.D2[index]?.PhanTram } : null,
-    D3: groupedData.D3 ? { MaViTriKho: groupedData.D3[index]?.MaViTriKho, PhanTram: groupedData.D3[index]?.PhanTram } : null,
-    D4: groupedData.D4 ? { MaViTriKho: groupedData.D4[index]?.MaViTriKho, PhanTram: groupedData.D4[index]?.PhanTram } : null,
-    D5: groupedData.D5 ? { MaViTriKho: groupedData.D5[index]?.MaViTriKho, PhanTram: groupedData.D5[index]?.PhanTram } : null,
-    D6: groupedData.D6 ? { MaViTriKho: groupedData.D6[index]?.MaViTriKho, PhanTram: groupedData.D6[index]?.PhanTram } : null,
+    D1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
+    D2: groupedData.D2 ? { MaViTriKho: groupedData.D2[index]?.MaViTriKho, PhanTram: groupedData.D2[index]?.PhanTram, ItemCode: groupedData.D2[index]?.ItemCode } : null,
+    D3: groupedData.D3 ? { MaViTriKho: groupedData.D3[index]?.MaViTriKho, PhanTram: groupedData.D3[index]?.PhanTram, ItemCode: groupedData.D3[index]?.ItemCode } : null,
+    D4: groupedData.D4 ? { MaViTriKho: groupedData.D4[index]?.MaViTriKho, PhanTram: groupedData.D4[index]?.PhanTram, ItemCode: groupedData.D4[index]?.ItemCode } : null,
+    D5: groupedData.D5 ? { MaViTriKho: groupedData.D5[index]?.MaViTriKho, PhanTram: groupedData.D5[index]?.PhanTram, ItemCode: groupedData.D5[index]?.ItemCode } : null,
+    D6: groupedData.D6 ? { MaViTriKho: groupedData.D6[index]?.MaViTriKho, PhanTram: groupedData.D6[index]?.PhanTram, ItemCode: groupedData.D6[index]?.ItemCode } : null,
   }));
 
   const result_D = [];
@@ -307,12 +389,12 @@ const KhoK3 = (props) => {
     }
   }
   const data_E = Object.keys(groupedData).length > 0 && groupedData.E1.map((item, index) => ({
-    E1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram },
-    E2: groupedData.E2 ? { MaViTriKho: groupedData.E2[index]?.MaViTriKho, PhanTram: groupedData.E2[index]?.PhanTram } : null,
-    E3: groupedData.E3 ? { MaViTriKho: groupedData.E3[index]?.MaViTriKho, PhanTram: groupedData.E3[index]?.PhanTram } : null,
-    E4: groupedData.E4 ? { MaViTriKho: groupedData.E4[index]?.MaViTriKho, PhanTram: groupedData.E4[index]?.PhanTram } : null,
-    E5: groupedData.E5 ? { MaViTriKho: groupedData.E5[index]?.MaViTriKho, PhanTram: groupedData.E5[index]?.PhanTram } : null,
-    E6: groupedData.E6 ? { MaViTriKho: groupedData.E6[index]?.MaViTriKho, PhanTram: groupedData.E6[index]?.PhanTram } : null,
+    E1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
+    E2: groupedData.E2 ? { MaViTriKho: groupedData.E2[index]?.MaViTriKho, PhanTram: groupedData.E2[index]?.PhanTram, ItemCode: groupedData.E2[index]?.ItemCode } : null,
+    E3: groupedData.E3 ? { MaViTriKho: groupedData.E3[index]?.MaViTriKho, PhanTram: groupedData.E3[index]?.PhanTram, ItemCode: groupedData.E3[index]?.ItemCode } : null,
+    E4: groupedData.E4 ? { MaViTriKho: groupedData.E4[index]?.MaViTriKho, PhanTram: groupedData.E4[index]?.PhanTram, ItemCode: groupedData.E4[index]?.ItemCode } : null,
+    E5: groupedData.E5 ? { MaViTriKho: groupedData.E5[index]?.MaViTriKho, PhanTram: groupedData.E5[index]?.PhanTram, ItemCode: groupedData.E5[index]?.ItemCode } : null,
+    E6: groupedData.E6 ? { MaViTriKho: groupedData.E6[index]?.MaViTriKho, PhanTram: groupedData.E6[index]?.PhanTram, ItemCode: groupedData.E6[index]?.ItemCode } : null,
   }));
 
   const result_E = [];
@@ -339,12 +421,12 @@ const KhoK3 = (props) => {
     }
   }
   const data_F = Object.keys(groupedData).length > 0 && groupedData.F1.map((item, index) => ({
-    F1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram },
-    F2: groupedData.F2 ? { MaViTriKho: groupedData.F2[index]?.MaViTriKho, PhanTram: groupedData.F2[index]?.PhanTram } : null,
-    F3: groupedData.F3 ? { MaViTriKho: groupedData.F3[index]?.MaViTriKho, PhanTram: groupedData.F3[index]?.PhanTram } : null,
-    F4: groupedData.F4 ? { MaViTriKho: groupedData.F4[index]?.MaViTriKho, PhanTram: groupedData.F4[index]?.PhanTram } : null,
-    F5: groupedData.F5 ? { MaViTriKho: groupedData.F5[index]?.MaViTriKho, PhanTram: groupedData.F5[index]?.PhanTram } : null,
-    F6: groupedData.F6 ? { MaViTriKho: groupedData.F6[index]?.MaViTriKho, PhanTram: groupedData.F6[index]?.PhanTram } : null,
+    F1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
+    F2: groupedData.F2 ? { MaViTriKho: groupedData.F2[index]?.MaViTriKho, PhanTram: groupedData.F2[index]?.PhanTram, ItemCode: groupedData.F2[index]?.ItemCode } : null,
+    F3: groupedData.F3 ? { MaViTriKho: groupedData.F3[index]?.MaViTriKho, PhanTram: groupedData.F3[index]?.PhanTram, ItemCode: groupedData.F3[index]?.ItemCode } : null,
+    F4: groupedData.F4 ? { MaViTriKho: groupedData.F4[index]?.MaViTriKho, PhanTram: groupedData.F4[index]?.PhanTram, ItemCode: groupedData.F4[index]?.ItemCode } : null,
+    F5: groupedData.F5 ? { MaViTriKho: groupedData.F5[index]?.MaViTriKho, PhanTram: groupedData.F5[index]?.PhanTram, ItemCode: groupedData.F5[index]?.ItemCode } : null,
+    F6: groupedData.F6 ? { MaViTriKho: groupedData.F6[index]?.MaViTriKho, PhanTram: groupedData.F6[index]?.PhanTram, ItemCode: groupedData.F6[index]?.ItemCode } : null,
   }));
 
   const result_F = [];
@@ -371,12 +453,12 @@ const KhoK3 = (props) => {
     }
   }
   const data_G = Object.keys(groupedData).length > 0 && groupedData.G1.map((item, index) => ({
-    G1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram },
-    G2: groupedData.G2 ? { MaViTriKho: groupedData.G2[index]?.MaViTriKho, PhanTram: groupedData.G2[index]?.PhanTram } : null,
-    G3: groupedData.G3 ? { MaViTriKho: groupedData.G3[index]?.MaViTriKho, PhanTram: groupedData.G3[index]?.PhanTram } : null,
-    G4: groupedData.G4 ? { MaViTriKho: groupedData.G4[index]?.MaViTriKho, PhanTram: groupedData.G4[index]?.PhanTram } : null,
-    G5: groupedData.G5 ? { MaViTriKho: groupedData.G5[index]?.MaViTriKho, PhanTram: groupedData.G5[index]?.PhanTram } : null,
-    G6: groupedData.G6 ? { MaViTriKho: groupedData.G6[index]?.MaViTriKho, PhanTram: groupedData.G6[index]?.PhanTram } : null,
+    G1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
+    G2: groupedData.G2 ? { MaViTriKho: groupedData.G2[index]?.MaViTriKho, PhanTram: groupedData.G2[index]?.PhanTram, ItemCode: groupedData.G2[index]?.ItemCode } : null,
+    G3: groupedData.G3 ? { MaViTriKho: groupedData.G3[index]?.MaViTriKho, PhanTram: groupedData.G3[index]?.PhanTram, ItemCode: groupedData.G3[index]?.ItemCode } : null,
+    G4: groupedData.G4 ? { MaViTriKho: groupedData.G4[index]?.MaViTriKho, PhanTram: groupedData.G4[index]?.PhanTram, ItemCode: groupedData.G4[index]?.ItemCode } : null,
+    G5: groupedData.G5 ? { MaViTriKho: groupedData.G5[index]?.MaViTriKho, PhanTram: groupedData.G5[index]?.PhanTram, ItemCode: groupedData.G5[index]?.ItemCode } : null,
+    G6: groupedData.G6 ? { MaViTriKho: groupedData.G6[index]?.MaViTriKho, PhanTram: groupedData.G6[index]?.PhanTram, ItemCode: groupedData.G6[index]?.ItemCode } : null,
   }));
 
   const result_G = [];
@@ -403,14 +485,14 @@ const KhoK3 = (props) => {
     }
   }
   const data_H = Object.keys(groupedData).length > 0 && groupedData.H1.map((item, index) => ({
-    H1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram },
-    H2: groupedData.H2 ? { MaViTriKho: groupedData.H2[index]?.MaViTriKho, PhanTram: groupedData.H2[index]?.PhanTram } : null,
-    H3: groupedData.H3 ? { MaViTriKho: groupedData.H3[index]?.MaViTriKho, PhanTram: groupedData.H3[index]?.PhanTram } : null,
-    H4: groupedData.H4 ? { MaViTriKho: groupedData.H4[index]?.MaViTriKho, PhanTram: groupedData.H4[index]?.PhanTram } : null,
-    H5: groupedData.H5 ? { MaViTriKho: groupedData.H5[index]?.MaViTriKho, PhanTram: groupedData.H5[index]?.PhanTram } : null,
-    H6: groupedData.H6 ? { MaViTriKho: groupedData.H6[index]?.MaViTriKho, PhanTram: groupedData.H6[index]?.PhanTram } : null,
+    H1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
+    H2: groupedData.H2 ? { MaViTriKho: groupedData.H2[index]?.MaViTriKho, PhanTram: groupedData.H2[index]?.PhanTram, ItemCode: groupedData.H2[index]?.ItemCode } : null,
+    H3: groupedData.H3 ? { MaViTriKho: groupedData.H3[index]?.MaViTriKho, PhanTram: groupedData.H3[index]?.PhanTram, ItemCode: groupedData.H3[index]?.ItemCode } : null,
+    H4: groupedData.H4 ? { MaViTriKho: groupedData.H4[index]?.MaViTriKho, PhanTram: groupedData.H4[index]?.PhanTram, ItemCode: groupedData.H5[index]?.ItemCode } : null,
+    H5: groupedData.H5 ? { MaViTriKho: groupedData.H5[index]?.MaViTriKho, PhanTram: groupedData.H5[index]?.PhanTram, ItemCode: groupedData.H5[index]?.ItemCode } : null,
+    H6: groupedData.H6 ? { MaViTriKho: groupedData.H6[index]?.MaViTriKho, PhanTram: groupedData.H6[index]?.PhanTram, ItemCode: groupedData.H6[index]?.ItemCode } : null,
   }));
-
+  console.log(data_H)
   const result_H = [];
   if (data_H) {
 
@@ -435,12 +517,12 @@ const KhoK3 = (props) => {
     }
   }
   const data_I = Object.keys(groupedData).length > 0 && groupedData.I1.map((item, index) => ({
-    I1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram },
-    I2: groupedData.I2 ? { MaViTriKho: groupedData.I2[index]?.MaViTriKho, PhanTram: groupedData.I2[index]?.PhanTram } : null,
-    I3: groupedData.I3 ? { MaViTriKho: groupedData.I3[index]?.MaViTriKho, PhanTram: groupedData.I3[index]?.PhanTram } : null,
-    I4: groupedData.I4 ? { MaViTriKho: groupedData.I4[index]?.MaViTriKho, PhanTram: groupedData.I4[index]?.PhanTram } : null,
-    I5: groupedData.I5 ? { MaViTriKho: groupedData.I5[index]?.MaViTriKho, PhanTram: groupedData.I5[index]?.PhanTram } : null,
-    I6: groupedData.I6 ? { MaViTriKho: groupedData.I6[index]?.MaViTriKho, PhanTram: groupedData.I6[index]?.PhanTram } : null,
+    I1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
+    I2: groupedData.I2 ? { MaViTriKho: groupedData.I2[index]?.MaViTriKho, PhanTram: groupedData.I2[index]?.PhanTram, ItemCode: groupedData.I2[index]?.ItemCode } : null,
+    I3: groupedData.I3 ? { MaViTriKho: groupedData.I3[index]?.MaViTriKho, PhanTram: groupedData.I3[index]?.PhanTram, ItemCode: groupedData.I3[index]?.ItemCode } : null,
+    I4: groupedData.I4 ? { MaViTriKho: groupedData.I4[index]?.MaViTriKho, PhanTram: groupedData.I4[index]?.PhanTram, ItemCode: groupedData.I4[index]?.ItemCode } : null,
+    I5: groupedData.I5 ? { MaViTriKho: groupedData.I5[index]?.MaViTriKho, PhanTram: groupedData.I5[index]?.PhanTram, ItemCode: groupedData.I5[index]?.ItemCode } : null,
+    I6: groupedData.I6 ? { MaViTriKho: groupedData.I6[index]?.MaViTriKho, PhanTram: groupedData.I6[index]?.PhanTram, ItemCode: groupedData.I6[index]?.ItemCode } : null,
   }));
 
   const result_I = [];
@@ -467,14 +549,13 @@ const KhoK3 = (props) => {
     }
   }
   const data_J = Object.keys(groupedData).length > 0 && groupedData.J1.map((item, index) => ({
-    J1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram },
-    J2: groupedData.J2 ? { MaViTriKho: groupedData.J2[index]?.MaViTriKho, PhanTram: groupedData.J2[index]?.PhanTram } : null,
-    J3: groupedData.J3 ? { MaViTriKho: groupedData.J3[index]?.MaViTriKho, PhanTram: groupedData.J3[index]?.PhanTram } : null,
-    J4: groupedData.J4 ? { MaViTriKho: groupedData.J4[index]?.MaViTriKho, PhanTram: groupedData.J4[index]?.PhanTram } : null,
-    J5: groupedData.J5 ? { MaViTriKho: groupedData.J5[index]?.MaViTriKho, PhanTram: groupedData.J5[index]?.PhanTram } : null,
-    J6: groupedData.J6 ? { MaViTriKho: groupedData.J6[index]?.MaViTriKho, PhanTram: groupedData.J6[index]?.PhanTram } : null,
+    J1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
+    J2: groupedData.J2 ? { MaViTriKho: groupedData.J2[index]?.MaViTriKho, PhanTram: groupedData.J2[index]?.PhanTram, ItemCode: groupedData.J2[index]?.ItemCode } : null,
+    J3: groupedData.J3 ? { MaViTriKho: groupedData.J3[index]?.MaViTriKho, PhanTram: groupedData.J3[index]?.PhanTram, ItemCode: groupedData.J3[index]?.ItemCode } : null,
+    J4: groupedData.J4 ? { MaViTriKho: groupedData.J4[index]?.MaViTriKho, PhanTram: groupedData.J4[index]?.PhanTram, ItemCode: groupedData.J4[index]?.ItemCode } : null,
+    J5: groupedData.J5 ? { MaViTriKho: groupedData.J5[index]?.MaViTriKho, PhanTram: groupedData.J5[index]?.PhanTram, ItemCode: groupedData.J5[index]?.ItemCode } : null,
+    J6: groupedData.J6 ? { MaViTriKho: groupedData.J6[index]?.MaViTriKho, PhanTram: groupedData.J6[index]?.PhanTram, ItemCode: groupedData.J6[index]?.ItemCode } : null,
   }));
-
   const result_J = [];
   if (data_J) {
 
@@ -538,16 +619,16 @@ const KhoK3 = (props) => {
                   );
                   return (
                     <div
-                      className={className}
+                      className={`${className} ${isHighlighted ? 'blink-glow' : ''}`}
                       style={{
                         transform: 'rotate(90deg)',
                         whiteSpace: 'nowrap',
                         textAlign: 'center',
                         fontSize: '8px',
-                        outline: isHighlighted ? '2px solid blue' : 'none',
-                        // backgroundColor: threshold && record.PhanTram === threshold ? 'lightgreen' : 'transparent',
+                        // outline: isHighlighted ? '2px solid blue' : 'none',
+                        // border: '1px solid #000'
                       }}
-                      onClick={() => handleClick(record.PhanTram)}
+                      onClick={() => handleClick(record.PhanTram, record.ItemCode)}
                     >
                       {record.MaViTriKho}
                     </div>
@@ -571,25 +652,26 @@ const KhoK3 = (props) => {
                       : record.PhanTram > 0 && record.PhanTram <= 85
                         ? 'green-background'
                         : 'white-background';
+
                   const isHighlighted = viTri.some(
                     (item) => item.MaViTriKho === record.MaViTriKho
                   );
                   return (
                     <div
-                      className={className}
+                      className={`${className} ${isHighlighted ? 'blink-glow' : ''}`}
                       style={{
                         transform: 'rotate(90deg)',
                         whiteSpace: 'nowrap',
                         textAlign: 'center',
                         fontSize: '8px',
-                        outline: isHighlighted ? '2px solid blue' : 'none',
-                        // backgroundColor: threshold && record.PhanTram === threshold ? 'lightgreen' : 'transparent',
+                        // outline: isHighlighted ? '2px solid blue' : 'none',
+                        // border: '1px solid #000',
                       }}
-                      onClick={() => handleClick(record.PhanTram)}
+                      onClick={() => handleClick(record.PhanTram, record.ItemCode)}
                     >
                       {record.MaViTriKho}
                     </div>
-                  )
+                  );
                 },
                 width: 20,
               },
@@ -632,8 +714,13 @@ const KhoK3 = (props) => {
           show: false
         }
       },
+      stroke: {
+        show: true,  // Hiển thị viền
+        width: 0.5,    // Độ dày của viền
+        colors: ['#000'], // Màu viền đen
+      },
       labels: labels,
-      colors: ['#54a8f6', '#3ca63cc4', '#fcff4dc4', '#db3d3dcc'],
+      colors: ['#fff', '#3ca63cc4', '#fcff4dc4', '#db3d3dcc'],
       legend: {
         // show: false
         fontSize: '10px'
@@ -646,7 +733,18 @@ const KhoK3 = (props) => {
         },
         distance: '20px', // Khoảng cách giữa data labels và tâm pie chart (tăng giá trị này sẽ đưa nhãn ra xa hơn)
       },
-
+      tooltip: {
+        enabled: true,
+        theme: 'light', // Chủ đề của tooltip (light, dark)
+        style: {
+          fontSize: '12px', // Kích thước chữ trong tooltip
+          fontFamily: 'Arial, sans-serif', // Phông chữ
+          color: '#007BFF', // Màu chữ (xanh dương)
+        },
+        marker: {
+          show: true, // Hiển thị màu marker bên cạnh tooltip
+        },
+      },
     }
   }
   return (
@@ -660,12 +758,12 @@ const KhoK3 = (props) => {
           xl={12}
           className="mb-24"
         >
-          <Card bordered={false} className="criclebox ">
+          <Card bordered={false} className="criclebox " style={{ position: 'relative', top: 10, left: '30%', position: 'fixed', zIndex: 2 }}>
             <Row align="middle" justify="space-around" gutter={[24, 0]}>
               <Col xs={8}>
                 <Input
                   type="text"
-                  placeholder="Lệnh xuất vật tư"
+                  placeholder="Lệnh xuất BTP"
                   value={inputLenhXuatVT}
                   onChange={handleInputLenhXuatVTChange}
                   prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
@@ -694,20 +792,18 @@ const KhoK3 = (props) => {
 
       <Row gutter={[24, 0]}>
         <Col xs={24} sm={24} md={12} lg={12} xl={18} className="mb-24">
-          <Card bordered={false} className="criclebox h-full">
+          <Card bordered={false} className="criclebox h-full" style={{
+            // transform: "scale(0.5)", 
+            transform: `scale(${scale})`,
+            transformOrigin: 'top center',
+            transformOrigin: 'top left',
+            width: `${100 / scale}%`, overflow: 'hidden'
+          }}>
             <div className="linechart">
               <div>
                 <Title level={5}>SƠ ĐỒ KHO</Title>
               </div>
               <div className="sales">
-                {/* <Card style={{ backgroundColor: '#e8e8e8' }}>
-                  <ul style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                    <li>{<MinusOutlined style={{ color: 'green' }} />} </li>
-                    <li>{<MinusOutlined style={{ color: 'yellow' }} />} </li>
-                    <li>{<MinusOutlined style={{ color: '#ffffff' }} />} Trống </li>
-                    <li>{<MinusOutlined style={{ color: 'red' }} />} Đầy </li>
-                  </ul>
-                </Card> */}
               </div>
             </div>
             <div className="Layout_Kho" style={{ width: '100%', flexGrow: 1, marginTop: 10 }}>
@@ -726,6 +822,10 @@ const KhoK3 = (props) => {
                           dataSource={result_A}
                           pagination={false}
                           rowKey="key"
+                          scroll={{
+                            x: 'max-content',
+                          }}
+
                         />
                       </div>
                       <div style={{
@@ -838,6 +938,7 @@ const KhoK3 = (props) => {
                       }}
                         ref={tableRef}>
                         <Table
+                          className='duy'
                           columns={columns_J}
                           bordered
                           dataSource={result_J}
@@ -847,12 +948,18 @@ const KhoK3 = (props) => {
                       </div>
                     </div>
                     <Modal
-                      title="Phần trăm hàng"
+                      title="Thông tin vị trí"
                       visible={isModalVisible}
                       onCancel={handleModalClose}
                       onOk={handleModalClose}
                     >
-                      <p>{selectedKey}%</p>
+                      <p>Phần trăm: {selectedKey} %</p>
+                      <Table
+                        columns={columnsMaVT}
+                        dataSource={DataMaVT}
+                        pagination={false}
+                        size="middle"
+                      />
                     </Modal>
                   </div>
                 </TransformComponent>
@@ -860,11 +967,11 @@ const KhoK3 = (props) => {
             </div>
           </Card>
         </Col>
-        <Col xs={24} sm={24} md={12} lg={12} xl={6} className="mb-24">
-          <Card bordered={false} className="criclebox h-full" style={{ height: 200 }}>
-            <ReactApexChart options={config.options} series={config.series} type="pie" width={280} />
-          </Card>
-        </Col>
+        {/* <Col xs={24} sm={24} md={12} lg={12} className="mb-24"> */}
+        <Card bordered={false} className="criclebox h-full" style={{ height: 200, width: 300, position: 'fixed', right: '1%', backgroundColor: '#c8c8c8' }}>
+          <ReactApexChart options={config.options} series={config.series} type="pie" width={280} />
+        </Card>
+        {/* </Col> */}
       </Row >
     </>
   );
