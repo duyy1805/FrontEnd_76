@@ -33,7 +33,7 @@ const callAPILayoutKho_BTP = async () => {
     // Gửi yêu cầu GET tới API
     const response = await axios.get('http://localhost:5000/api/khoBTP', {
       params: {
-        TenNha: "Kho K3", // Truyền tham số nếu cần
+        TenNha: "Kho K3",
         ID_Kho: 5,
         MaVung: "B"
       }
@@ -65,7 +65,7 @@ const KhoK3 = (props) => {
       // Gửi yêu cầu GET tới API
       const response = await axios.get('http://localhost:5000/api/khoBTP/search', {
         params: {
-          So_LenhXuatBTP: inputLenhXuatVT, // Truyền tham số nếu cần
+          So_LenhXuatBTP: inputLenhXuatVT,
           Itemcode: inputMaVatTu,
         }
       });
@@ -164,7 +164,7 @@ const KhoK3 = (props) => {
           // Tạo khóa duy nhất dựa vào rowTitle, MaViTriKho, và PhanTram
           const key = `${item.rowTitle}-${item.MaViTriKho}-${item.PhanTram}`;
 
-          // Nếu nhóm chưa tồn tại, khởi tạo nó
+
           if (!acc[key]) {
             acc[key] = {
               rowTitle: item.rowTitle,
@@ -174,7 +174,7 @@ const KhoK3 = (props) => {
             };
           }
 
-          // Thêm ItemCode và Checkv vào mảng (nếu chưa tồn tại)
+
           const exists = acc[key].ItemCode.some(i => i.ItemCode === item.ItemCode && i.Checkv === item.Checkv);
           if (!exists) {
             acc[key].ItemCode.push({ ItemCode: item.ItemCode, Checkv: item.Checkv });
@@ -716,7 +716,7 @@ const KhoK3 = (props) => {
       },
       stroke: {
         show: true,  // Hiển thị viền
-        width: 0.5,    // Độ dày của viền
+        width: 0.5,
         colors: ['#000'], // Màu viền đen
       },
       labels: labels,
@@ -726,23 +726,23 @@ const KhoK3 = (props) => {
         fontSize: '10px'
       },
       dataLabels: {
-        enabled: true, // Bật hiển thị data labels
-        drop: true, // Cho phép nhãn "rơi" ra ngoài
+        enabled: true,
+        drop: true,
         style: {
-          fontSize: '10px', // Kích thước chữ của data labels
+          fontSize: '10px', // 
         },
-        distance: '20px', // Khoảng cách giữa data labels và tâm pie chart (tăng giá trị này sẽ đưa nhãn ra xa hơn)
+        distance: '20px',
       },
       tooltip: {
         enabled: true,
-        theme: 'light', // Chủ đề của tooltip (light, dark)
+        theme: 'light',
         style: {
-          fontSize: '12px', // Kích thước chữ trong tooltip
-          fontFamily: 'Arial, sans-serif', // Phông chữ
-          color: '#007BFF', // Màu chữ (xanh dương)
+          fontSize: '12px',
+          fontFamily: 'Arial, sans-serif',
+          color: '#007BFF',
         },
         marker: {
-          show: true, // Hiển thị màu marker bên cạnh tooltip
+          show: true,
         },
       },
     }
