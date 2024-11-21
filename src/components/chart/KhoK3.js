@@ -30,14 +30,20 @@ import ApexCharts from 'apexcharts'
 
 const callAPILayoutKho_BTP = async () => {
   try {
-    // Gửi yêu cầu GET tới API
-    const response = await axios.get('http://localhost:5000/api/khoBTP', {
-      params: {
-        TenNha: "Kho K3",
-        ID_Kho: 5,
-        MaVung: "B"
+
+    const response = await axios.post(
+      'http://125.212.207.52:5000/layoutkho/btp',
+      {
+        tenNha: "Kho K3",
+        idKho: 5,
+        maVung: "B"
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       }
-    });
+    );
     return (response)
   } catch (error) {
     console.error('Lỗi khi lấy dữ liệu:', error);
@@ -63,12 +69,18 @@ const KhoK3 = (props) => {
   const callAPISearch_ = async () => {
     try {
       // Gửi yêu cầu GET tới API
-      const response = await axios.get('http://localhost:5000/api/khoBTP/search', {
-        params: {
-          So_LenhXuatBTP: inputLenhXuatVT,
-          Itemcode: inputMaVatTu,
+      const response = await axios.post(
+        'http://125.212.207.52:5000/layoutkho/bylenhxuatbtp',
+        {
+          soLenhXuatBTP: inputLenhXuatVT,//LXBTP-2023-10-1879
+          itemCode: inputMaVatTu
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
-      });
+      );
       return (response)
     } catch (error) {
       console.error('Lỗi khi lấy dữ liệu:', error);
@@ -103,7 +115,6 @@ const KhoK3 = (props) => {
   };
 
   const handleClick = (key, key2) => {
-    console.log(key2)
     setSelectedKey(key); // Lưu trữ key của ô được nhấp
     setSelectedMaVT(key2)
     setIsModalVisible(true); // Hiển thị modal
@@ -127,14 +138,14 @@ const KhoK3 = (props) => {
       const response = await callAPISearch_();
       const map = new Map();
       const uniqueData = response.data.filter((item) => {
-        const key = `${item.ID_ViTriKho}_${item.MaViTriKho}_${item.ItemCode}`;
+        const key = `${item.idViTriKho}_${item.maViTriKho}_${item.itemCode}`;
         if (!map.has(key)) {
           map.set(key, true);
           return true;
         }
         return false;
       });
-
+      console.log(response.data)
       setViTri(response.data);
 
     }
@@ -147,10 +158,11 @@ const KhoK3 = (props) => {
     const fetchData = async () => {
       try {
         const response = await callAPILayoutKho_BTP();
-        const MaViTriKho = response.data.map(item => item.MaViTriKho);
-        const PhanTram = response.data.map(item => item.PhanTram);
-        const ItemCode = response.data.map(item => item.ItemCode);
-        const Checkv = response.data.map(item => item.Checkv);
+        const MaViTriKho = response.data.map(item => item.maViTriKho);
+        const PhanTram = response.data.map(item => item.phanTram);
+        const ItemCode = response.data.map(item => item.itemCode);
+        const Checkv = response.data.map(item => item.checkv);
+
         // Lưu dữ liệu vào state
         const formattedData = MaViTriKho.map((MaViTriKho, index) => ({
           // key: index + 1,
@@ -162,7 +174,7 @@ const KhoK3 = (props) => {
         }));
         const groupedData = formattedData.reduce((acc, item) => {
           // Tạo khóa duy nhất dựa vào rowTitle, MaViTriKho, và PhanTram
-          const key = `${item.rowTitle}-${item.MaViTriKho}-${item.PhanTram}`;
+          const key = `${item.rowTitle}-${item.MaViTriKho}`;
 
 
           if (!acc[key]) {
@@ -187,7 +199,7 @@ const KhoK3 = (props) => {
         const finalGroupedData = Object.values(groupedData);
 
         setData(finalGroupedData);
-
+        console.log(finalGroupedData)
       } catch (error) {
         console.error('Lỗi khi gọi API:', error);
       }
@@ -492,7 +504,6 @@ const KhoK3 = (props) => {
     H5: groupedData.H5 ? { MaViTriKho: groupedData.H5[index]?.MaViTriKho, PhanTram: groupedData.H5[index]?.PhanTram, ItemCode: groupedData.H5[index]?.ItemCode } : null,
     H6: groupedData.H6 ? { MaViTriKho: groupedData.H6[index]?.MaViTriKho, PhanTram: groupedData.H6[index]?.PhanTram, ItemCode: groupedData.H6[index]?.ItemCode } : null,
   }));
-  console.log(data_H)
   const result_H = [];
   if (data_H) {
 
@@ -615,7 +626,7 @@ const KhoK3 = (props) => {
                         ? 'green-background'
                         : 'white-background';
                   const isHighlighted = viTri.some(
-                    (item) => item.MaViTriKho === record.MaViTriKho
+                    (item) => item.maViTriKho === record.MaViTriKho
                   );
                   return (
                     <div
@@ -654,7 +665,7 @@ const KhoK3 = (props) => {
                         : 'white-background';
 
                   const isHighlighted = viTri.some(
-                    (item) => item.MaViTriKho === record.MaViTriKho
+                    (item) => item.maViTriKho === record.MaViTriKho
                   );
                   return (
                     <div
