@@ -145,8 +145,8 @@ const KhoK3 = (props) => {
         }
         return false;
       });
-      console.log(response.data)
-      setViTri(response.data);
+      // console.log(response.data)
+      setViTri(uniqueData);
 
     }
     catch (error) {
