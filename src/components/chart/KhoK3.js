@@ -25,14 +25,14 @@ import khoK3 from "./configs/khoK3";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "../../assets/styles/Style.css"
 import ApexCharts from 'apexcharts'
-
+import apiConfig from '../../../src/apiConfig.json'
 
 
 const callAPILayoutKho_BTP = async () => {
   try {
 
     const response = await axios.post(
-      'http://125.212.207.52:5000/layoutkho/btp',
+      `${apiConfig.API_BASE_URL}/layoutkho/btp`,
       {
         tenNha: "Kho K3",
         idKho: 5,
@@ -70,7 +70,7 @@ const KhoK3 = (props) => {
     try {
       // Gửi yêu cầu GET tới API
       const response = await axios.post(
-        'http://125.212.207.52:5000/layoutkho/bylenhxuatbtp',
+        `${apiConfig.API_BASE_URL}/layoutkho/bylenhxuatbtp`,
         {
           soLenhXuatBTP: inputLenhXuatVT,//LXBTP-2023-10-1879
           itemCode: inputMaVatTu
@@ -83,7 +83,11 @@ const KhoK3 = (props) => {
       );
       return (response)
     } catch (error) {
-      console.error('Lỗi khi lấy dữ liệu:', error);
+      if (error.response) {
+        console.log("Mã lỗi:", error.response.status); // Mã lỗi nếu có lỗi trong phản hồi
+      } else {
+        console.error("Lỗi kết nối hoặc yêu cầu", error);
+      }
     }
   }
 
@@ -197,9 +201,7 @@ const KhoK3 = (props) => {
 
         // Chuyển đổi đối tượng thành mảng
         const finalGroupedData = Object.values(groupedData);
-
         setData(finalGroupedData);
-        console.log(finalGroupedData)
       } catch (error) {
         console.error('Lỗi khi gọi API:', error);
       }
@@ -969,7 +971,7 @@ const KhoK3 = (props) => {
                         columns={columnsMaVT}
                         dataSource={DataMaVT}
                         pagination={false}
-                        size="middle"
+                      // size="middle"
                       />
                     </Modal>
                   </div>
