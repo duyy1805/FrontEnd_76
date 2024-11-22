@@ -11,7 +11,7 @@
 */
 import React, { useState, useEffect, useRef } from 'react';
 import ReactApexChart from "react-apexcharts";
-import { Typography, Table, Modal, Row, Col, Card, Input, Button } from "antd";
+import { Typography, Table, Tooltip, Modal, Row, Col, Card, Input, Button } from "antd";
 import {
   MinusOutlined, SearchOutlined,
   StarOutlined,
@@ -58,6 +58,7 @@ const KhoK3 = (props) => {
   //==============useState
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedKey, setSelectedKey] = useState(null);
+  const [selectedMaViTriKho, setSelectedMaviTriKho] = useState(null);
   const [selectedMaVT, setSelectedMaVT] = useState([]);
   const [data, setData] = useState([]);
   const [inputLenhXuatVT, setInputLenhXuatVT] = useState("");
@@ -95,6 +96,9 @@ const KhoK3 = (props) => {
     key: index,
     ItemCode: item.ItemCode,
     Checkv: item.Checkv,
+    Ma_DonHang: item.Ma_DonHang,
+    Ten_SanPham: item.Ten_SanPham,
+    Ton: item.Ton,
   }));
   const columnsMaVT = [
     {
@@ -103,10 +107,46 @@ const KhoK3 = (props) => {
       key: 'ItemCode',
       align: 'center',
     },
+    {
+      title: 'Tên sản phẩm',
+      dataIndex: 'Ten_SanPham',
+      key: 'Ten_SanPham',
+      align: 'center',
+      ellipsis: {
+        showTitle: false, // Ẩn tooltip mặc định
+      },
+      render: (text) => (
+        <Tooltip placement="topLeft" title={text}>
+          {text}
+        </Tooltip>
+      ),
+      width: "30%"
+    },
+    {
+      title: 'Mã đơn hàng',
+      dataIndex: 'Ma_DonHang',
+      key: 'Ma_DonHang',
+      align: 'center',
+      ellipsis: {
+        showTitle: false, // Ẩn tooltip mặc định
+      },
+      render: (text) => (
+        <Tooltip placement="topLeft" title={text}>
+          {text}
+        </Tooltip>
+      ),
+      width: "30%"
+    },
+    {
+      title: 'Tồn',
+      dataIndex: 'Ton',
+      key: 'Ton',
+      align: 'center',
+    },
     // {
-    //   title: 'Trạng thái',
-    //   dataIndex: 'Checkv',
-    //   key: 'Checkv',
+    //   title: 'Tuổi tồn',
+    //   dataIndex: '',
+    //   key: '',
     //   align: 'center',
     // },
   ];
@@ -118,9 +158,10 @@ const KhoK3 = (props) => {
     setInputMaVatTu(e.target.value);
   };
 
-  const handleClick = (key, key2) => {
+  const handleClick = (key, key2, key3) => {
     setSelectedKey(key); // Lưu trữ key của ô được nhấp
     setSelectedMaVT(key2)
+    setSelectedMaviTriKho(key3)
     setIsModalVisible(true); // Hiển thị modal
   };
 
@@ -149,7 +190,6 @@ const KhoK3 = (props) => {
         }
         return false;
       });
-      // console.log(response.data)
       setViTri(uniqueData);
 
     }
@@ -162,11 +202,13 @@ const KhoK3 = (props) => {
     const fetchData = async () => {
       try {
         const response = await callAPILayoutKho_BTP();
-        const MaViTriKho = response.data.map(item => item.maViTriKho);
-        const PhanTram = response.data.map(item => item.phanTram);
-        const ItemCode = response.data.map(item => item.itemCode);
-        const Checkv = response.data.map(item => item.checkv);
-
+        const MaViTriKho = response.data.map(item => item.MaViTriKho);
+        const PhanTram = response.data.map(item => item.PhanTram);
+        const ItemCode = response.data.map(item => item.ItemCode);
+        const Checkv = response.data.map(item => item.Checkv);
+        const Ten_SanPham = response.data.map(item => item.Ten_SanPham);
+        const Ma_DonHang = response.data.map(item => item.Ma_DonHang);
+        const Ton = response.data.map(item => item.ton);
         // Lưu dữ liệu vào state
         const formattedData = MaViTriKho.map((MaViTriKho, index) => ({
           // key: index + 1,
@@ -174,7 +216,10 @@ const KhoK3 = (props) => {
           MaViTriKho: MaViTriKho,
           PhanTram: PhanTram[index],
           ItemCode: ItemCode[index],
-          Checkv: Checkv[index]
+          Checkv: Checkv[index],
+          Ten_SanPham: Ten_SanPham[index],
+          Ma_DonHang: Ma_DonHang[index],
+          Ton: Ton[index],
         }));
         const groupedData = formattedData.reduce((acc, item) => {
           // Tạo khóa duy nhất dựa vào rowTitle, MaViTriKho, và PhanTram
@@ -193,12 +238,16 @@ const KhoK3 = (props) => {
 
           const exists = acc[key].ItemCode.some(i => i.ItemCode === item.ItemCode && i.Checkv === item.Checkv);
           if (!exists) {
-            acc[key].ItemCode.push({ ItemCode: item.ItemCode, Checkv: item.Checkv });
+            acc[key].ItemCode.push({
+              ItemCode: item.ItemCode, Checkv: item.Checkv,
+              Ma_DonHang: item.Ma_DonHang,
+              Ten_SanPham: item.Ten_SanPham,
+              Ton: item.Ton,
+            });
           }
 
           return acc;
         }, {});
-
         // Chuyển đổi đối tượng thành mảng
         const finalGroupedData = Object.values(groupedData);
         setData(finalGroupedData);
@@ -275,323 +324,67 @@ const KhoK3 = (props) => {
   });
 
   //=================================================
-  const data_A = Object.keys(groupedData).length > 0 && groupedData.A1.map((item, index) => ({
-    A1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
-    A2: groupedData.A2 ? { MaViTriKho: groupedData.A2[index]?.MaViTriKho, PhanTram: groupedData.A2[index]?.PhanTram, ItemCode: groupedData.A2[index]?.ItemCode } : null,
-    A3: groupedData.A3 ? { MaViTriKho: groupedData.A3[index]?.MaViTriKho, PhanTram: groupedData.A3[index]?.PhanTram, ItemCode: groupedData.A2[index]?.ItemCode } : null,
-    A4: groupedData.A4 ? { MaViTriKho: groupedData.A4[index]?.MaViTriKho, PhanTram: groupedData.A4[index]?.PhanTram, ItemCode: groupedData.A2[index]?.ItemCode } : null,
-    A5: groupedData.A5 ? { MaViTriKho: groupedData.A5[index]?.MaViTriKho, PhanTram: groupedData.A5[index]?.PhanTram, ItemCode: groupedData.A2[index]?.ItemCode } : null,
-    A6: groupedData.A6 ? { MaViTriKho: groupedData.A6[index]?.MaViTriKho, PhanTram: groupedData.A6[index]?.PhanTram, ItemCode: groupedData.A2[index]?.ItemCode } : null,
-  }));
-  const result_A = [];
-  if (data_A) {
+  const createData = (groupedData, prefix) => {
+    if (Object.keys(groupedData).length === 0) return null;
 
-    for (let index = 0; index < data_A.length / 2; index++) {
-      result_A.push({
+    return groupedData[`${prefix}1`]?.map((item, index) => {
+      const entry = {};
+      for (let i = 1; i <= 6; i++) {
+        const key = `${prefix}${i}`;
+        entry[key] = groupedData[key]
+          ? {
+            MaViTriKho: groupedData[key][index]?.MaViTriKho,
+            PhanTram: groupedData[key][index]?.PhanTram,
+            ItemCode: groupedData[key][index]?.ItemCode,
+          }
+          : null;
+      }
+      return entry;
+    });
+  };
+
+  // Sử dụng
+  const data_A = createData(groupedData, 'A');
+  const data_B = createData(groupedData, 'B');
+  const data_C = createData(groupedData, 'C');
+  const data_D = createData(groupedData, 'D');
+  const data_E = createData(groupedData, 'E');
+  const data_F = createData(groupedData, 'F');
+  const data_G = createData(groupedData, 'G');
+  const data_H = createData(groupedData, 'H');
+  const data_I = createData(groupedData, 'I');
+  const data_J = createData(groupedData, 'J');
+  const createResult = (data, prefix) => {
+    if (!data) return [];
+
+    const result = [];
+    for (let index = 0; index < data.length / 2; index++) {
+      const values = [];
+      for (let i = 1; i <= 6; i++) {
+        values.push(data[index * 2][`${prefix}${i}`]);
+        values.push(data[index * 2 + 1][`${prefix}${i}`]);
+      }
+      result.push({
         key: index,
-        values: [
-          data_A[index * 2].A1,
-          data_A[index * 2 + 1].A1,
-          data_A[index * 2].A2,
-          data_A[index * 2 + 1].A2,
-          data_A[index * 2].A3,
-          data_A[index * 2 + 1].A3,
-          data_A[index * 2].A4,
-          data_A[index * 2 + 1].A4,
-          data_A[index * 2].A5,
-          data_A[index * 2 + 1].A5,
-          data_A[index * 2].A6,
-          data_A[index * 2 + 1].A6,
-        ],
+        values,
       });
     }
-  }
-  const data_B = Object.keys(groupedData).length > 0 && groupedData.B1.map((item, index) => ({
-    B1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
-    B2: groupedData.B2 ? { MaViTriKho: groupedData.B2[index]?.MaViTriKho, PhanTram: groupedData.B2[index]?.PhanTram, ItemCode: groupedData.B2[index]?.ItemCode } : null,
-    B3: groupedData.B3 ? { MaViTriKho: groupedData.B3[index]?.MaViTriKho, PhanTram: groupedData.B3[index]?.PhanTram, ItemCode: groupedData.B3[index]?.ItemCode } : null,
-    B4: groupedData.B4 ? { MaViTriKho: groupedData.B4[index]?.MaViTriKho, PhanTram: groupedData.B4[index]?.PhanTram, ItemCode: groupedData.B4[index]?.ItemCode } : null,
-    B5: groupedData.B5 ? { MaViTriKho: groupedData.B5[index]?.MaViTriKho, PhanTram: groupedData.B5[index]?.PhanTram, ItemCode: groupedData.B5[index]?.ItemCode } : null,
-    B6: groupedData.B6 ? { MaViTriKho: groupedData.B6[index]?.MaViTriKho, PhanTram: groupedData.B6[index]?.PhanTram, ItemCode: groupedData.B6[index]?.ItemCode } : null,
-  }));
+    return result;
+  };
 
-  const result_B = [];
-  if (data_B) {
+  // Sử dụng
+  const result_A = createResult(data_A, 'A');
+  const result_B = createResult(data_B, 'B');
+  const result_C = createResult(data_C, 'C');
+  const result_D = createResult(data_D, 'D');
+  const result_E = createResult(data_E, 'E');
+  const result_F = createResult(data_F, 'F');
+  const result_G = createResult(data_G, 'G');
+  const result_H = createResult(data_H, 'H');
+  const result_I = createResult(data_I, 'I');
+  const result_J = createResult(data_J, 'J');
 
-    for (let index = 0; index < data_B.length / 2; index++) {
-      result_B.push({
-        key: index,
-        values: [
-          data_B[index * 2].B1,
-          data_B[index * 2 + 1].B1,
-          data_B[index * 2].B2,
-          data_B[index * 2 + 1].B2,
-          data_B[index * 2].B3,
-          data_B[index * 2 + 1].B3,
-          data_B[index * 2].B4,
-          data_B[index * 2 + 1].B4,
-          data_B[index * 2].B5,
-          data_B[index * 2 + 1].B5,
-          data_B[index * 2].B6,
-          data_B[index * 2 + 1].B6,
-        ],
-      });
-    }
-  }
-  const data_C = Object.keys(groupedData).length > 0 && groupedData.C1.map((item, index) => ({
-    C1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
-    C2: groupedData.C2 ? { MaViTriKho: groupedData.C2[index]?.MaViTriKho, PhanTram: groupedData.C2[index]?.PhanTram, ItemCode: groupedData.C2[index]?.ItemCode } : null,
-    C3: groupedData.C3 ? { MaViTriKho: groupedData.C3[index]?.MaViTriKho, PhanTram: groupedData.C3[index]?.PhanTram, ItemCode: groupedData.C3[index]?.ItemCode } : null,
-    C4: groupedData.C4 ? { MaViTriKho: groupedData.C4[index]?.MaViTriKho, PhanTram: groupedData.C4[index]?.PhanTram, ItemCode: groupedData.C4[index]?.ItemCode } : null,
-    C5: groupedData.C5 ? { MaViTriKho: groupedData.C5[index]?.MaViTriKho, PhanTram: groupedData.C5[index]?.PhanTram, ItemCode: groupedData.C5[index]?.ItemCode } : null,
-    C6: groupedData.C6 ? { MaViTriKho: groupedData.C6[index]?.MaViTriKho, PhanTram: groupedData.C6[index]?.PhanTram, ItemCode: groupedData.C6[index]?.ItemCode } : null,
-  }));
 
-  const result_C = [];
-  if (data_C) {
-
-    for (let index = 0; index < data_C.length / 2; index++) {
-      result_C.push({
-        key: index,
-        values: [
-          data_C[index * 2].C1,
-          data_C[index * 2 + 1].C1,
-          data_C[index * 2].C2,
-          data_C[index * 2 + 1].C2,
-          data_C[index * 2].C3,
-          data_C[index * 2 + 1].C3,
-          data_C[index * 2].C4,
-          data_C[index * 2 + 1].C4,
-          data_C[index * 2].C5,
-          data_C[index * 2 + 1].C5,
-          data_C[index * 2].C6,
-          data_C[index * 2 + 1].C6,
-        ],
-      });
-    }
-  }
-  const data_D = Object.keys(groupedData).length > 0 && groupedData.D1.map((item, index) => ({
-    D1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
-    D2: groupedData.D2 ? { MaViTriKho: groupedData.D2[index]?.MaViTriKho, PhanTram: groupedData.D2[index]?.PhanTram, ItemCode: groupedData.D2[index]?.ItemCode } : null,
-    D3: groupedData.D3 ? { MaViTriKho: groupedData.D3[index]?.MaViTriKho, PhanTram: groupedData.D3[index]?.PhanTram, ItemCode: groupedData.D3[index]?.ItemCode } : null,
-    D4: groupedData.D4 ? { MaViTriKho: groupedData.D4[index]?.MaViTriKho, PhanTram: groupedData.D4[index]?.PhanTram, ItemCode: groupedData.D4[index]?.ItemCode } : null,
-    D5: groupedData.D5 ? { MaViTriKho: groupedData.D5[index]?.MaViTriKho, PhanTram: groupedData.D5[index]?.PhanTram, ItemCode: groupedData.D5[index]?.ItemCode } : null,
-    D6: groupedData.D6 ? { MaViTriKho: groupedData.D6[index]?.MaViTriKho, PhanTram: groupedData.D6[index]?.PhanTram, ItemCode: groupedData.D6[index]?.ItemCode } : null,
-  }));
-
-  const result_D = [];
-  if (data_D) {
-
-    for (let index = 0; index < data_D.length / 2; index++) {
-      result_D.push({
-        key: index,
-        values: [
-          data_D[index * 2].D1,
-          data_D[index * 2 + 1].D1,
-          data_D[index * 2].D2,
-          data_D[index * 2 + 1].D2,
-          data_D[index * 2].D3,
-          data_D[index * 2 + 1].D3,
-          data_D[index * 2].D4,
-          data_D[index * 2 + 1].D4,
-          data_D[index * 2].D5,
-          data_D[index * 2 + 1].D5,
-          data_D[index * 2].D6,
-          data_D[index * 2 + 1].D6,
-        ],
-      });
-    }
-  }
-  const data_E = Object.keys(groupedData).length > 0 && groupedData.E1.map((item, index) => ({
-    E1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
-    E2: groupedData.E2 ? { MaViTriKho: groupedData.E2[index]?.MaViTriKho, PhanTram: groupedData.E2[index]?.PhanTram, ItemCode: groupedData.E2[index]?.ItemCode } : null,
-    E3: groupedData.E3 ? { MaViTriKho: groupedData.E3[index]?.MaViTriKho, PhanTram: groupedData.E3[index]?.PhanTram, ItemCode: groupedData.E3[index]?.ItemCode } : null,
-    E4: groupedData.E4 ? { MaViTriKho: groupedData.E4[index]?.MaViTriKho, PhanTram: groupedData.E4[index]?.PhanTram, ItemCode: groupedData.E4[index]?.ItemCode } : null,
-    E5: groupedData.E5 ? { MaViTriKho: groupedData.E5[index]?.MaViTriKho, PhanTram: groupedData.E5[index]?.PhanTram, ItemCode: groupedData.E5[index]?.ItemCode } : null,
-    E6: groupedData.E6 ? { MaViTriKho: groupedData.E6[index]?.MaViTriKho, PhanTram: groupedData.E6[index]?.PhanTram, ItemCode: groupedData.E6[index]?.ItemCode } : null,
-  }));
-
-  const result_E = [];
-  if (data_E) {
-
-    for (let index = 0; index < data_E.length / 2; index++) {
-      result_E.push({
-        key: index,
-        values: [
-          data_E[index * 2].E1,
-          data_E[index * 2 + 1].E1,
-          data_E[index * 2].E2,
-          data_E[index * 2 + 1].E2,
-          data_E[index * 2].E3,
-          data_E[index * 2 + 1].E3,
-          data_E[index * 2].E4,
-          data_E[index * 2 + 1].E4,
-          data_E[index * 2].E5,
-          data_E[index * 2 + 1].E5,
-          data_E[index * 2].E6,
-          data_E[index * 2 + 1].E6,
-        ],
-      });
-    }
-  }
-  const data_F = Object.keys(groupedData).length > 0 && groupedData.F1.map((item, index) => ({
-    F1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
-    F2: groupedData.F2 ? { MaViTriKho: groupedData.F2[index]?.MaViTriKho, PhanTram: groupedData.F2[index]?.PhanTram, ItemCode: groupedData.F2[index]?.ItemCode } : null,
-    F3: groupedData.F3 ? { MaViTriKho: groupedData.F3[index]?.MaViTriKho, PhanTram: groupedData.F3[index]?.PhanTram, ItemCode: groupedData.F3[index]?.ItemCode } : null,
-    F4: groupedData.F4 ? { MaViTriKho: groupedData.F4[index]?.MaViTriKho, PhanTram: groupedData.F4[index]?.PhanTram, ItemCode: groupedData.F4[index]?.ItemCode } : null,
-    F5: groupedData.F5 ? { MaViTriKho: groupedData.F5[index]?.MaViTriKho, PhanTram: groupedData.F5[index]?.PhanTram, ItemCode: groupedData.F5[index]?.ItemCode } : null,
-    F6: groupedData.F6 ? { MaViTriKho: groupedData.F6[index]?.MaViTriKho, PhanTram: groupedData.F6[index]?.PhanTram, ItemCode: groupedData.F6[index]?.ItemCode } : null,
-  }));
-
-  const result_F = [];
-  if (data_F) {
-
-    for (let index = 0; index < data_F.length / 2; index++) {
-      result_F.push({
-        key: index,
-        values: [
-          data_F[index * 2].F1,
-          data_F[index * 2 + 1].F1,
-          data_F[index * 2].F2,
-          data_F[index * 2 + 1].F2,
-          data_F[index * 2].F3,
-          data_F[index * 2 + 1].F3,
-          data_F[index * 2].F4,
-          data_F[index * 2 + 1].F4,
-          data_F[index * 2].F5,
-          data_F[index * 2 + 1].F5,
-          data_F[index * 2].F6,
-          data_F[index * 2 + 1].F6,
-        ],
-      });
-    }
-  }
-  const data_G = Object.keys(groupedData).length > 0 && groupedData.G1.map((item, index) => ({
-    G1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
-    G2: groupedData.G2 ? { MaViTriKho: groupedData.G2[index]?.MaViTriKho, PhanTram: groupedData.G2[index]?.PhanTram, ItemCode: groupedData.G2[index]?.ItemCode } : null,
-    G3: groupedData.G3 ? { MaViTriKho: groupedData.G3[index]?.MaViTriKho, PhanTram: groupedData.G3[index]?.PhanTram, ItemCode: groupedData.G3[index]?.ItemCode } : null,
-    G4: groupedData.G4 ? { MaViTriKho: groupedData.G4[index]?.MaViTriKho, PhanTram: groupedData.G4[index]?.PhanTram, ItemCode: groupedData.G4[index]?.ItemCode } : null,
-    G5: groupedData.G5 ? { MaViTriKho: groupedData.G5[index]?.MaViTriKho, PhanTram: groupedData.G5[index]?.PhanTram, ItemCode: groupedData.G5[index]?.ItemCode } : null,
-    G6: groupedData.G6 ? { MaViTriKho: groupedData.G6[index]?.MaViTriKho, PhanTram: groupedData.G6[index]?.PhanTram, ItemCode: groupedData.G6[index]?.ItemCode } : null,
-  }));
-
-  const result_G = [];
-  if (data_G) {
-
-    for (let index = 0; index < data_G.length / 2; index++) {
-      result_G.push({
-        key: index,
-        values: [
-          data_G[index * 2].G1,
-          data_G[index * 2 + 1].G1,
-          data_G[index * 2].G2,
-          data_G[index * 2 + 1].G2,
-          data_G[index * 2].G3,
-          data_G[index * 2 + 1].G3,
-          data_G[index * 2].G4,
-          data_G[index * 2 + 1].G4,
-          data_G[index * 2].G5,
-          data_G[index * 2 + 1].G5,
-          data_G[index * 2].G6,
-          data_G[index * 2 + 1].G6,
-        ],
-      });
-    }
-  }
-  const data_H = Object.keys(groupedData).length > 0 && groupedData.H1.map((item, index) => ({
-    H1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
-    H2: groupedData.H2 ? { MaViTriKho: groupedData.H2[index]?.MaViTriKho, PhanTram: groupedData.H2[index]?.PhanTram, ItemCode: groupedData.H2[index]?.ItemCode } : null,
-    H3: groupedData.H3 ? { MaViTriKho: groupedData.H3[index]?.MaViTriKho, PhanTram: groupedData.H3[index]?.PhanTram, ItemCode: groupedData.H3[index]?.ItemCode } : null,
-    H4: groupedData.H4 ? { MaViTriKho: groupedData.H4[index]?.MaViTriKho, PhanTram: groupedData.H4[index]?.PhanTram, ItemCode: groupedData.H5[index]?.ItemCode } : null,
-    H5: groupedData.H5 ? { MaViTriKho: groupedData.H5[index]?.MaViTriKho, PhanTram: groupedData.H5[index]?.PhanTram, ItemCode: groupedData.H5[index]?.ItemCode } : null,
-    H6: groupedData.H6 ? { MaViTriKho: groupedData.H6[index]?.MaViTriKho, PhanTram: groupedData.H6[index]?.PhanTram, ItemCode: groupedData.H6[index]?.ItemCode } : null,
-  }));
-  const result_H = [];
-  if (data_H) {
-
-    for (let index = 0; index < data_H.length / 2; index++) {
-      result_H.push({
-        key: index,
-        values: [
-          data_H[index * 2].H1,
-          data_H[index * 2 + 1].H1,
-          data_H[index * 2].H2,
-          data_H[index * 2 + 1].H2,
-          data_H[index * 2].H3,
-          data_H[index * 2 + 1].H3,
-          data_H[index * 2].H4,
-          data_H[index * 2 + 1].H4,
-          data_H[index * 2].H5,
-          data_H[index * 2 + 1].H5,
-          data_H[index * 2].H6,
-          data_H[index * 2 + 1].H6,
-        ],
-      });
-    }
-  }
-  const data_I = Object.keys(groupedData).length > 0 && groupedData.I1.map((item, index) => ({
-    I1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
-    I2: groupedData.I2 ? { MaViTriKho: groupedData.I2[index]?.MaViTriKho, PhanTram: groupedData.I2[index]?.PhanTram, ItemCode: groupedData.I2[index]?.ItemCode } : null,
-    I3: groupedData.I3 ? { MaViTriKho: groupedData.I3[index]?.MaViTriKho, PhanTram: groupedData.I3[index]?.PhanTram, ItemCode: groupedData.I3[index]?.ItemCode } : null,
-    I4: groupedData.I4 ? { MaViTriKho: groupedData.I4[index]?.MaViTriKho, PhanTram: groupedData.I4[index]?.PhanTram, ItemCode: groupedData.I4[index]?.ItemCode } : null,
-    I5: groupedData.I5 ? { MaViTriKho: groupedData.I5[index]?.MaViTriKho, PhanTram: groupedData.I5[index]?.PhanTram, ItemCode: groupedData.I5[index]?.ItemCode } : null,
-    I6: groupedData.I6 ? { MaViTriKho: groupedData.I6[index]?.MaViTriKho, PhanTram: groupedData.I6[index]?.PhanTram, ItemCode: groupedData.I6[index]?.ItemCode } : null,
-  }));
-
-  const result_I = [];
-  if (data_I) {
-
-    for (let index = 0; index < data_I.length / 2; index++) {
-      result_I.push({
-        key: index,
-        values: [
-          data_I[index * 2].I1,
-          data_I[index * 2 + 1].I1,
-          data_I[index * 2].I2,
-          data_I[index * 2 + 1].I2,
-          data_I[index * 2].I3,
-          data_I[index * 2 + 1].I3,
-          data_I[index * 2].I4,
-          data_I[index * 2 + 1].I4,
-          data_I[index * 2].I5,
-          data_I[index * 2 + 1].I5,
-          data_I[index * 2].I6,
-          data_I[index * 2 + 1].I6,
-        ],
-      });
-    }
-  }
-  const data_J = Object.keys(groupedData).length > 0 && groupedData.J1.map((item, index) => ({
-    J1: { MaViTriKho: item.MaViTriKho, PhanTram: item.PhanTram, ItemCode: item.ItemCode },
-    J2: groupedData.J2 ? { MaViTriKho: groupedData.J2[index]?.MaViTriKho, PhanTram: groupedData.J2[index]?.PhanTram, ItemCode: groupedData.J2[index]?.ItemCode } : null,
-    J3: groupedData.J3 ? { MaViTriKho: groupedData.J3[index]?.MaViTriKho, PhanTram: groupedData.J3[index]?.PhanTram, ItemCode: groupedData.J3[index]?.ItemCode } : null,
-    J4: groupedData.J4 ? { MaViTriKho: groupedData.J4[index]?.MaViTriKho, PhanTram: groupedData.J4[index]?.PhanTram, ItemCode: groupedData.J4[index]?.ItemCode } : null,
-    J5: groupedData.J5 ? { MaViTriKho: groupedData.J5[index]?.MaViTriKho, PhanTram: groupedData.J5[index]?.PhanTram, ItemCode: groupedData.J5[index]?.ItemCode } : null,
-    J6: groupedData.J6 ? { MaViTriKho: groupedData.J6[index]?.MaViTriKho, PhanTram: groupedData.J6[index]?.PhanTram, ItemCode: groupedData.J6[index]?.ItemCode } : null,
-  }));
-  const result_J = [];
-  if (data_J) {
-
-    for (let index = 0; index < data_J.length / 2; index++) {
-      result_J.push({
-        key: index,
-        values: [
-          data_J[index * 2].J1,
-          data_J[index * 2 + 1].J1,
-          data_J[index * 2].J2,
-          data_J[index * 2 + 1].J2,
-          data_J[index * 2].J3,
-          data_J[index * 2 + 1].J3,
-          data_J[index * 2].J4,
-          data_J[index * 2 + 1].J4,
-          data_J[index * 2].J5,
-          data_J[index * 2 + 1].J5,
-          data_J[index * 2].J6,
-          data_J[index * 2 + 1].J6,
-        ],
-      });
-    }
-  }
   //========================================
 
   const generateColumn = (keyPrefix) => {
@@ -641,7 +434,7 @@ const KhoK3 = (props) => {
                         // outline: isHighlighted ? '2px solid blue' : 'none',
                         // border: '1px solid #000'
                       }}
-                      onClick={() => handleClick(record.PhanTram, record.ItemCode)}
+                      onClick={() => handleClick(record.PhanTram, record.ItemCode, record.MaViTriKho)}
                     >
                       {record.MaViTriKho}
                     </div>
@@ -680,7 +473,7 @@ const KhoK3 = (props) => {
                         // outline: isHighlighted ? '2px solid blue' : 'none',
                         // border: '1px solid #000',
                       }}
-                      onClick={() => handleClick(record.PhanTram, record.ItemCode)}
+                      onClick={() => handleClick(record.PhanTram, record.ItemCode, record.MaViTriKho)}
                     >
                       {record.MaViTriKho}
                     </div>
@@ -961,10 +754,11 @@ const KhoK3 = (props) => {
                       </div>
                     </div>
                     <Modal
-                      title="Thông tin vị trí"
+                      title={`Mã vị trí kho: ${selectedMaViTriKho || 'N/A'}`}
                       visible={isModalVisible}
                       onCancel={handleModalClose}
                       onOk={handleModalClose}
+                      width={"70%"}
                     >
                       <p>Phần trăm: {selectedKey} %</p>
                       <Table
