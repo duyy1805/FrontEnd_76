@@ -11,16 +11,20 @@
 */
 import React, { useState, useEffect, useRef } from 'react';
 import ReactApexChart from "react-apexcharts";
-import { Typography, Table, Tooltip, Modal, Row, Col, Card, Input, Button } from "antd";
+import {
+  Typography, Table,
+  Tooltip, Modal, Row, Col,
+  Card, Input, Button, Select, Space,
+  List
+} from "antd";
 import {
   MinusOutlined, SearchOutlined,
   StarOutlined,
   TwitterOutlined,
   FacebookFilled,
+  FullscreenOutlined, FullscreenExitOutlined,
 } from "@ant-design/icons";
 import axios from 'axios';
-// import lineChart from "./configs/lineChart";
-// import Echart from "./EChart";
 import khoK3 from "./configs/khoK3";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "../../assets/styles/Style.css"
@@ -64,9 +68,38 @@ const KhoK3 = (props) => {
   const [inputLenhXuatVT, setInputLenhXuatVT] = useState("");
   const [inputMaVatTu, setInputMaVatTu] = useState("");
   const [viTri, setViTri] = useState([]);
+  const [highlightedCell, setHighlightedCell] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState([]);
+  const [highlightedRows, setHighlightedRows] = useState([]);
+  const [listData, setListData] = useState([]);
+  const [height, setHeight] = useState(window.innerHeight);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
-
-
+  // Xử lý bật/tắt chế độ toàn màn hình
+  const toggleFullScreen = () => {
+    if (!isFullScreen) {
+      const element = document.documentElement; // Lấy thẻ HTML để kích hoạt fullscreen
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  };
   const callAPISearch_ = async () => {
     try {
       // Gửi yêu cầu GET tới API
@@ -99,10 +132,11 @@ const KhoK3 = (props) => {
     Ma_DonHang: item.Ma_DonHang,
     Ten_SanPham: item.Ten_SanPham,
     Ton: item.Ton,
+    tuoiTonBTP: item.tuoiTonBTP
   }));
   const columnsMaVT = [
     {
-      title: 'Mã vật tư',
+      title: 'Item Code',
       dataIndex: 'ItemCode',
       key: 'ItemCode',
       align: 'center',
@@ -143,13 +177,28 @@ const KhoK3 = (props) => {
       key: 'Ton',
       align: 'center',
     },
-    // {
-    //   title: 'Tuổi tồn',
-    //   dataIndex: '',
-    //   key: '',
-    //   align: 'center',
-    // },
+    {
+      title: 'Tuổi tồn',
+      dataIndex: 'tuoiTonBTP',
+      key: '',
+      align: 'center',
+    },
   ];
+  const updateHeight = () => {
+    setHeight(window.innerHeight);
+  };
+
+  const ChangeSelectTenSP = (value) => {
+    setSelectedProduct(value);
+    const matchedRows = data.filter((record) =>
+      record.ItemCode.some((item) => item.Ten_SanPham === value)
+    );
+    console.log(matchedRows)
+    // setHighlightedRows(matchedRows.map((row) => row.MaViTriKho));
+
+    setListData(value === undefined ? data : matchedRows)
+  }
+
   const handleInputLenhXuatVTChange = (e) => {
     setInputLenhXuatVT(e.target.value);
   };
@@ -178,11 +227,17 @@ const KhoK3 = (props) => {
     setThreshold(value);
   };
 
+  const handleClear = () => {
+    setViTri([])
+    setListData(data)
+  }
+
   const handleSubmit = async () => {
     try {
       const response = await callAPISearch_();
       const map = new Map();
       const uniqueData = response.data.filter((item) => {
+        // const key = `${item.idViTriKho}_${item.maViTriKho}_${item.itemCode}`;
         const key = `${item.idViTriKho}_${item.maViTriKho}_${item.itemCode}`;
         if (!map.has(key)) {
           map.set(key, true);
@@ -190,26 +245,57 @@ const KhoK3 = (props) => {
         }
         return false;
       });
-      setViTri(uniqueData);
+      setViTri(inputMaVatTu === '' && inputLenhXuatVT === '' ? [] : uniqueData);
 
+      const uniqueMaViTriKho = uniqueData.map(item => item.maViTriKho); // Lấy tất cả MaViTriKho từ uniqueData
+
+      const listData = data.filter((item) => uniqueMaViTriKho.includes(item.MaViTriKho));
+      setListData(inputMaVatTu === '' && inputLenhXuatVT === '' ? data : listData)
+      console.log(uniqueData)
     }
     catch (error) {
       console.error('Lỗi khi gọi API:', error);
     }
   }
 
+  const enterFullScreen = () => {
+    const element = document.documentElement; // Lấy phần tử HTML chính
+    if (element.requestFullscreen) {
+      element.requestFullscreen();
+    } else if (element.mozRequestFullScreen) {
+      element.mozRequestFullScreen(); // Firefox
+    } else if (element.webkitRequestFullscreen) {
+      element.webkitRequestFullscreen(); // Chrome, Safari, Opera
+    } else if (element.msRequestFullscreen) {
+      element.msRequestFullscreen(); // IE/Edge
+    }
+  };
   useEffect(() => {
+
     const fetchData = async () => {
       try {
         const response = await callAPILayoutKho_BTP();
-        const MaViTriKho = response.data.map(item => item.MaViTriKho);
-        const PhanTram = response.data.map(item => item.PhanTram);
-        const ItemCode = response.data.map(item => item.ItemCode);
-        const Checkv = response.data.map(item => item.Checkv);
-        const Ten_SanPham = response.data.map(item => item.Ten_SanPham);
-        const Ma_DonHang = response.data.map(item => item.Ma_DonHang);
+        const MaViTriKho = response.data.map(item => item.maViTriKho);
+        const PhanTram = response.data.map(item => item.phanTram);
+        const ItemCode = response.data.map(item => item.itemCode);
+        const Checkv = response.data.map(item => item.checkv);
+        const Ten_SanPham = response.data.map(item => item.tenSanPham);
+        const Ma_DonHang = response.data.map(item => item.maDonHang);
         const Ton = response.data.map(item => item.ton);
-        // Lưu dữ liệu vào state
+        const Ngay_NhapBTP = response.data.map(item => item.ngayNhapBTP);
+        // Lưu dữ liệu vào state  
+        const today = new Date(); // Lấy ngày hiện tại
+
+        const tuoiTonBTP = response.data.map(item => {
+          if (!item.Ngay_NhapBTP || item.ton === 0) {
+            return 0;
+          }
+          const ngayNhap = new Date(item.Ngay_NhapBTP); // Chuyển chuỗi Ngay_NhapBTP thành đối tượng Date
+          const diffTime = today - ngayNhap; // Tính hiệu số thời gian (miliseconds)
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // Chuyển đổi từ milliseconds sang số ngày
+          return diffDays; // Trả về số ngày tuổi tồn BTP
+        });
+
         const formattedData = MaViTriKho.map((MaViTriKho, index) => ({
           // key: index + 1,
           rowTitle: `Hàng ${MaViTriKho.slice(0, -2)}`, // Tạo rowTitle dựa vào phần đầu (bỏ 2 chữ số cuối)
@@ -220,6 +306,7 @@ const KhoK3 = (props) => {
           Ten_SanPham: Ten_SanPham[index],
           Ma_DonHang: Ma_DonHang[index],
           Ton: Ton[index],
+          tuoiTonBTP: tuoiTonBTP[index]
         }));
         const groupedData = formattedData.reduce((acc, item) => {
           // Tạo khóa duy nhất dựa vào rowTitle, MaViTriKho, và PhanTram
@@ -243,6 +330,7 @@ const KhoK3 = (props) => {
               Ma_DonHang: item.Ma_DonHang,
               Ten_SanPham: item.Ten_SanPham,
               Ton: item.Ton,
+              tuoiTonBTP: item.tuoiTonBTP
             });
           }
 
@@ -251,18 +339,44 @@ const KhoK3 = (props) => {
         // Chuyển đổi đối tượng thành mảng
         const finalGroupedData = Object.values(groupedData);
         setData(finalGroupedData);
+        setListData(finalGroupedData)
+
       } catch (error) {
         console.error('Lỗi khi gọi API:', error);
       }
     };
 
+    const handleFullScreenChange = () => {
+      setIsFullScreen(
+        document.fullscreenElement ||
+          document.mozFullScreenElement ||
+          document.webkitFullscreenElement ||
+          document.msFullscreenElement
+          ? true
+          : false
+      );
+    };
+
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullScreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullScreenChange);
+    document.addEventListener("msfullscreenchange", handleFullScreenChange);
+
+    window.addEventListener("resize", updateHeight);
+
     fetchData();
+
     const handleResize = () => {
       if (tableRef.current) {
+        const tableWidth = tableRef.current.offsetWidth;
         const tableHeight = tableRef.current.offsetHeight; // Lấy chiều cao của table
+        const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight; // Lấy chiều cao màn hình
-        const newScale = (screenHeight - 150) / tableHeight; // Tính toán scale
-        setScale(newScale < 1 ? newScale : 1); // Giới hạn scale tối đa là 1
+        // const newScale = (screenHeight - 150) / tableHeight;
+
+        const newScale = (tableWidth * 10 + 30) / ((screenWidth - 250) * 0.75);
+
+        setScale(newScale); // Giới hạn scale tối đa là 1
       }
     };
 
@@ -280,6 +394,19 @@ const KhoK3 = (props) => {
     return () => {
       window.removeEventListener('resize', handleResize);
       observer.disconnect(); // Hủy theo dõi MutationObserver
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullScreenChange
+      );
+      document.removeEventListener(
+        "mozfullscreenchange",
+        handleFullScreenChange
+      );
+      document.removeEventListener(
+        "msfullscreenchange",
+        handleFullScreenChange
+      );
     };
   }, [])
 
@@ -296,6 +423,7 @@ const KhoK3 = (props) => {
     { label: 'Đầy', value: countGreaterThan100 },
   ];
 
+
   const labels = result_Chart.map(item => item.label);
   const series = result_Chart.map(item => item.value);
 
@@ -307,6 +435,20 @@ const KhoK3 = (props) => {
     acc[prefix].push(item);
     return acc;
   }, {});
+
+  const optionsSelect = Array.from(
+    new Set(
+      data
+        .flatMap((item) =>
+          item.ItemCode?.map((code) => code.Ten_SanPham).filter((name) => name) || []
+        )
+    )
+  ).map((uniqueName) => ({
+    label: uniqueName,
+    value: uniqueName,
+  }));
+
+
   const sortedGroupedData = Object.entries(groupedData).map(([key, values]) => {
     // Sắp xếp mảng con theo MaViTriKho
     const sortedValues = values.sort((a, b) => {
@@ -322,7 +464,6 @@ const KhoK3 = (props) => {
 
     return { key, values: sortedValues };
   });
-
   //=================================================
   const createData = (groupedData, prefix) => {
     if (Object.keys(groupedData).length === 0) return null;
@@ -421,11 +562,16 @@ const KhoK3 = (props) => {
                         ? 'green-background'
                         : 'white-background';
                   const isHighlighted = viTri.some(
+                    // (item) => item.maViTriKho === record.MaViTriKho
                     (item) => item.maViTriKho === record.MaViTriKho
+                  );
+                  const isHighlighted2 = record.ItemCode.some(
+                    // (item) => item.maViTriKho === record.MaViTriKho
+                    (item) => item.Ten_SanPham === selectedProduct
                   );
                   return (
                     <div
-                      className={`${className} ${isHighlighted ? 'blink-glow' : ''}`}
+                      className={`${className} ${isHighlighted || isHighlighted2 ? 'blink-glow' : ''}`}
                       style={{
                         transform: 'rotate(90deg)',
                         whiteSpace: 'nowrap',
@@ -460,11 +606,16 @@ const KhoK3 = (props) => {
                         : 'white-background';
 
                   const isHighlighted = viTri.some(
+                    // (item) => item.maViTriKho === record.MaViTriKho
                     (item) => item.maViTriKho === record.MaViTriKho
+                  );
+                  const isHighlighted2 = record.ItemCode.some(
+                    // (item) => item.maViTriKho === record.MaViTriKho
+                    (item) => item.Ten_SanPham === selectedProduct
                   );
                   return (
                     <div
-                      className={`${className} ${isHighlighted ? 'blink-glow' : ''}`}
+                      className={`${className} ${isHighlighted || isHighlighted2 ? 'blink-glow' : ''}`}
                       style={{
                         transform: 'rotate(90deg)',
                         whiteSpace: 'nowrap',
@@ -564,7 +715,9 @@ const KhoK3 = (props) => {
           xl={12}
           className="mb-24"
         >
-          <Card bordered={false} className="criclebox " style={{ position: 'relative', top: 10, left: '30%', position: 'fixed', zIndex: 2 }}>
+          <Card bordered={false} className="criclebox "
+          // style={{ position: 'relative', top: 10, left: '30%', position: 'fixed', zIndex: 2 }}
+          >
             <Row align="middle" justify="space-around" gutter={[24, 0]}>
               <Col xs={8}>
                 <Input
@@ -579,35 +732,59 @@ const KhoK3 = (props) => {
               <Col xs={8}>
                 <Input
                   type="text"
-                  placeholder="Mã vật tư"
+                  placeholder="ItemCode"
                   value={inputMaVatTu}
                   onChange={handleInputMaVatTuChange}
                   prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
                   style={{ borderRadius: '6px' }}
                 />
               </Col>
-              <Col xs={6}>
+              <Col xs={3}>
                 <Button type="primary" onClick={handleSubmit} >
                   Search
+                </Button>
+              </Col>
+              <Col xs={3}>
+                <Button type="" onClick={handleClear} >
+                  Clear
                 </Button>
               </Col>
             </Row>
           </Card>
         </Col>
+        <Col xs={6}>
+          <Card bordered={false} className="criclebox ">
+            <Select
+              showSearch
+              size="large"
+              onChange={ChangeSelectTenSP}
+              allowClear
+              placeholder="Tên sản phẩm"
+              // mode="multiple"
+              style={{ width: '100%' }}
+              options={optionsSelect}
+            />
+          </Card>
+        </Col>
       </Row>
 
       <Row gutter={[24, 0]}>
-        <Col xs={24} sm={24} md={12} lg={12} xl={18} className="mb-24">
+        <Col xs={24} sm={24} md={12} lg={12} className="mb-24" style={{ marginTop: 12, marginBottom: 12 }}>
+          <Card bordered={false} className="criclebox h-full" style={{ height: 200, width: 300, backgroundColor: '#c8c8c8' }}>
+            <ReactApexChart options={config.options} series={config.series} type="pie" width={280} />
+          </Card>
+        </Col>
+        <Col xs={24} sm={24} md={12} lg={12} xl={19} className="mb-24">
           <Card bordered={false} className="criclebox h-full" style={{
-            // transform: "scale(0.5)", 
-            transform: `scale(${scale})`,
-            transformOrigin: 'top center',
+            // transform: "scale(0.3)",
+            transform: `scale(${100 / scale}%) `,
+            // transformOrigin: 'top center',
             transformOrigin: 'top left',
-            width: `${100 / scale}%`, overflow: 'hidden'
+            width: `${120 * scale}%`, overflow: 'hidden'
           }}>
             <div className="linechart">
-              <div>
-                <Title level={5}>SƠ ĐỒ KHO</Title>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <Title level={1}>SƠ ĐỒ KHO</Title>
               </div>
               <div className="sales">
               </div>
@@ -774,12 +951,68 @@ const KhoK3 = (props) => {
             </div>
           </Card>
         </Col>
-        {/* <Col xs={24} sm={24} md={12} lg={12} className="mb-24"> */}
-        <Card bordered={false} className="criclebox h-full" style={{ height: 200, width: 300, position: 'fixed', right: '1%', backgroundColor: '#c8c8c8' }}>
-          <ReactApexChart options={config.options} series={config.series} type="pie" width={280} />
-        </Card>
-        {/* </Col> */}
+
       </Row >
+      <Row gutter={[24, 0]}>
+        <Card
+          style={{
+            position: 'absolute',
+            top: 10,
+            left: -250,
+            width: 240,
+            height: window.innerHeight - 20,
+            overflow: 'hidden',
+            zIndex: 10,
+          }}
+        >
+          <div >
+            <h1
+              style={{
+                fontSize: '16px',
+                textAlign: 'center',
+                margin: '10px 0',
+              }}
+            >
+              Danh sách Vị trí Kho
+            </h1>
+            <div style={{ maxHeight: window.innerHeight - 80, overflowY: 'auto' }}>
+              <List
+                dataSource={listData}
+                renderItem={(record) => (
+                  <List.Item
+                    onClick={() => handleClick(record.PhanTram, record.ItemCode, record.MaViTriKho)} // Sự kiện click
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      cursor: 'pointer',
+                      border: '1px solid #f0f0f0',
+                      borderRadius: '8px',
+                      margin: '5px 10px',
+                      padding: '10px',
+                      backgroundColor: '#fff',
+                      userSelect: 'none', // Ngăn chặn chọn văn bản,
+                      transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#e6f7ff';
+                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#fff';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    <strong style={{ fontSize: '14px' }}>{record.MaViTriKho}</strong>
+                    <small style={{ color: '#888' }}>{record.PhanTram}%</small>
+                  </List.Item>
+                )}
+              />
+            </div>
+          </div>
+        </Card>
+
+      </Row >
+
     </>
   );
 }

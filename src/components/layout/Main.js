@@ -74,7 +74,7 @@ function Main({ children }) {
           </Sider>
         </Layout>
       </Drawer>
-      <Sider
+      {/* <Sider
         breakpoint="lg"
         collapsedWidth="0"
         onCollapse={(collapsed, type) => {
@@ -88,7 +88,7 @@ function Main({ children }) {
         style={{ background: sidenavType }}
       >
         <Sidenav color={sidenavColor} />
-      </Sider>
+      </Sider> */}
       <Layout>
         {fixed ? (
           <Affix>
