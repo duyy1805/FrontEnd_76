@@ -1634,7 +1634,7 @@ ul.ant-menu.ant-menu-root.ant-menu-inline.ant-menu-light.left-nav li.ant-menu-it
 }
 
 .ant-table-thead>tr>th {
-  color: #8c8c8c;
+  color: #000000;
   font-weight: 700;
   background-color: transparent;
   font-size: 12px;

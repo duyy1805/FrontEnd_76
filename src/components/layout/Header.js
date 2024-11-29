@@ -265,67 +265,9 @@ function Header({
 
   const [visible, setVisible] = useState(false);
   const [sidenavType, setSidenavType] = useState("transparent");
-  const [isFullScreen, setIsFullScreen] = useState(false);
-
-  // Xử lý bật/tắt chế độ toàn màn hình
-  const toggleFullScreen = () => {
-    if (!isFullScreen) {
-      const element = document.documentElement; // Lấy thẻ HTML để kích hoạt fullscreen
-      if (element.requestFullscreen) {
-        element.requestFullscreen();
-      } else if (element.mozRequestFullScreen) {
-        element.mozRequestFullScreen();
-      } else if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-      } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-    }
-  };
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    const handleFullScreenChange = () => {
-      setIsFullScreen(
-        document.fullscreenElement ||
-          document.mozFullScreenElement ||
-          document.webkitFullscreenElement ||
-          document.msFullscreenElement
-          ? true
-          : false
-      );
-    };
-    document.addEventListener("fullscreenchange", handleFullScreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullScreenChange);
-    document.addEventListener("mozfullscreenchange", handleFullScreenChange);
-    document.addEventListener("msfullscreenchange", handleFullScreenChange);
-
-    return () => {
-
-      document.removeEventListener("fullscreenchange", handleFullScreenChange);
-      document.removeEventListener(
-        "webkitfullscreenchange",
-        handleFullScreenChange
-      );
-      document.removeEventListener(
-        "mozfullscreenchange",
-        handleFullScreenChange
-      );
-      document.removeEventListener(
-        "msfullscreenchange",
-        handleFullScreenChange
-      );
-    };
   }, []);
 
   const showDrawer = () => setVisible(true);
@@ -333,9 +275,9 @@ function Header({
 
   return (
     <>
-      <div className="setting-drwer" onClick={showDrawer}>
+      {/* <div className="setting-drwer" onClick={showDrawer}>
         {setting}
-      </div>
+      </div> */}
       <Row gutter={[24, 0]}>
         <Col span={24} md={6}>
           <Breadcrumb>
@@ -364,23 +306,7 @@ function Header({
         </Col> */}
         <Col span={24} md={18} className="header-control">
           {/* <div style={{ height: "100px", position: "relative", background: "#f0f2f5" }}> */}
-          <div
-            style={{
-              position: "absolute",
-              top: 10,
-              right: 10,
-              zIndex: 1000,
-              cursor: "pointer",
-              fontSize: "24px",
-              backgroundColor: "white",
-              border: "1px solid #d9d9d9",
-              borderRadius: "4px",
-              padding: "5px",
-            }}
-            onClick={toggleFullScreen}
-          >
-            {isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
-          </div>
+
           {/* </div> */}
         </Col>
       </Row>

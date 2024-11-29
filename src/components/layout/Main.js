@@ -90,7 +90,7 @@ function Main({ children }) {
         <Sidenav color={sidenavColor} />
       </Sider> */}
       <Layout>
-        {fixed ? (
+        {/* {fixed ? (
           <Affix>
             <AntHeader className={`${fixed ? "ant-header-fixed" : ""}`}>
               <Header
@@ -114,7 +114,7 @@ function Main({ children }) {
               handleFixedNavbar={handleFixedNavbar}
             />
           </AntHeader>
-        )}
+        )} */}
         <Content className="content-ant">{children}</Content>
         <Footer />
       </Layout>

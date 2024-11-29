@@ -1,4 +1,18 @@
 /*!
+  Tỷ lệ phần trăm của dòng chủng loại(túi lều theo khách hàng)
+  Tổng chủng loại chia tổng số lương
+
+  -báo cáo 2: tỷ lệ chậm luân chuyển 
+  Sau bao lâu thì hàng đó phải xuất đi, sau 6 tháng, 
+  cảnh báo hàng chậm luân chuyển, các mã 
+  Tỷ lệ hàng để sai vị trí
+  
+  kho nhựa mới khu a
+  kho nguyên liệu anh Hoà
+
+  trước 30/11
+  tiêu đề báo cáo
+
   =========================================================
   * Muse Ant Design Dashboard - v1.0.0
   =========================================================
@@ -15,7 +29,7 @@ import {
   Typography, Table,
   Tooltip, Modal, Row, Col,
   Card, Input, Button, Select, Space,
-  List
+  List, Breadcrumb, notification
 } from "antd";
 import {
   MinusOutlined, SearchOutlined,
@@ -30,8 +44,9 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "../../assets/styles/Style.css"
 import ApexCharts from 'apexcharts'
 import apiConfig from '../../../src/apiConfig.json'
+import { NavLink, Link } from "react-router-dom";
 
-
+//Gọi API layout kho
 const callAPILayoutKho_BTP = async () => {
   try {
 
@@ -54,27 +69,56 @@ const callAPILayoutKho_BTP = async () => {
   }
 }
 
+const generateColors = (count) => {
+  const colors = [];
+  while (colors.length < count) {
+    const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+    if (!colors.includes(randomColor)) { // Đảm bảo màu không bị trùng
+      colors.push(randomColor);
+    }
+  }
+  return colors;
+};
 
+const colorsArray = generateColors(50);
 //Fucntion ở đây
 const KhoK3 = (props) => {
   const tableRef = useRef(null);
   const [scale, setScale] = useState(1);
   //==============useState
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible1, setIsModalVisible1] = useState(false);
   const [selectedKey, setSelectedKey] = useState(null);
   const [selectedMaViTriKho, setSelectedMaviTriKho] = useState(null);
-  const [selectedMaVT, setSelectedMaVT] = useState([]);
+  const [selectedMaViTri, setselectedMaViTri] = useState([]);
   const [data, setData] = useState([]);
   const [inputLenhXuatVT, setInputLenhXuatVT] = useState("");
   const [inputMaVatTu, setInputMaVatTu] = useState("");
   const [viTri, setViTri] = useState([]);
   const [highlightedCell, setHighlightedCell] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState([]);
+  const [selectedChamLC, setSelectedChamLC] = useState([]);
+
   const [highlightedRows, setHighlightedRows] = useState([]);
   const [listData, setListData] = useState([]);
   const [height, setHeight] = useState(window.innerHeight);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isDivVisible, setIsDivVisible] = useState(true);
+  //==
+  const [tenSP, setTenSP] = useState("");
+  const [tongTon, setTongTon] = useState("");
+  const [tong, setTong] = useState([]);
+  const [chamLC, setChamLC] = useState(undefined);
+  const [ngayChamLC, setNgayChamLC] = useState(179)
 
+  // Hàm xử lý toggle
+
+
+  const buttonRefScreen = useRef(null);
+
+  const toggleDiv = () => {
+    setIsDivVisible(!isDivVisible);
+  };
   // Xử lý bật/tắt chế độ toàn màn hình
   const toggleFullScreen = () => {
     if (!isFullScreen) {
@@ -100,14 +144,15 @@ const KhoK3 = (props) => {
       }
     }
   };
+  // api tìm kiếm
   const callAPISearch_ = async () => {
     try {
-      // Gửi yêu cầu GET tới API
+      // Gửi yêu cầu POST tới API
       const response = await axios.post(
         `${apiConfig.API_BASE_URL}/layoutkho/bylenhxuatbtp`,
         {
-          soLenhXuatBTP: inputLenhXuatVT,//LXBTP-2023-10-1879
-          itemCode: inputMaVatTu
+          soLenhXuatBTP: inputLenhXuatVT, // LXBTP-2024-11-3423
+          itemCode: inputMaVatTu // 4957326.B
         },
         {
           headers: {
@@ -115,25 +160,49 @@ const KhoK3 = (props) => {
           }
         }
       );
-      return (response)
+      return response;
     } catch (error) {
       if (error.response) {
-        console.log("Mã lỗi:", error.response.status); // Mã lỗi nếu có lỗi trong phản hồi
+        // Hiển thị thông báo lỗi bằng Ant Design notification
+        notification.error({
+          message: `Lỗi API: ${error.response.status}`,
+          description: error.response.data.message || 'Đã xảy ra lỗi. Vui lòng thử lại.',
+          duration: 5,
+        });
       } else {
-        console.error("Lỗi kết nối hoặc yêu cầu", error);
+        notification.error({
+          message: 'Lỗi kết nối',
+          description: 'Lỗi kết nối hoặc yêu cầu. Vui lòng kiểm tra kết nối mạng hoặc thử lại.',
+          duration: 5,
+        });
       }
     }
-  }
+  };
 
-  const DataMaVT = selectedMaVT.map((item, index) => ({
+
+  // Lọc và nhóm dữ liệu với tuoiTonBTP > 100
+  const overdueItems = data.flatMap(item =>
+    item.ItemCode.filter(subItem => subItem.tuoiTonBTP > ngayChamLC)
+  );
+
+  const overdueGroupedByProduct = overdueItems.reduce((acc, item) => {
+    const { Ten_SanPham, Ton } = item;
+    acc[Ten_SanPham] = (acc[Ten_SanPham] || 0) + Ton;
+    return acc;
+  }, {});
+
+  //Dữ liệu khi nhấn vào vị trí
+  const DataMaViTri = selectedMaViTri.map((item, index) => ({
     key: index,
     ItemCode: item.ItemCode,
     Checkv: item.Checkv,
     Ma_DonHang: item.Ma_DonHang,
     Ten_SanPham: item.Ten_SanPham,
     Ton: item.Ton,
-    tuoiTonBTP: item.tuoiTonBTP
+    tuoiTonBTP: item.tuoiTonBTP,
+    TongTonTheoMDH: item.TongTonTheoMDH
   }));
+  //Thông tin mã vị trí khi dùng Modal
   const columnsMaVT = [
     {
       title: 'Item Code',
@@ -172,7 +241,13 @@ const KhoK3 = (props) => {
       width: "30%"
     },
     {
-      title: 'Tồn',
+      title: 'Tổng Tồn',
+      dataIndex: 'TongTonTheoMDH',
+      key: 'TongTonTheoMDH',
+      align: 'center',
+    },
+    {
+      title: 'Tồn tại vị trí',
       dataIndex: 'Ton',
       key: 'Ton',
       align: 'center',
@@ -184,18 +259,66 @@ const KhoK3 = (props) => {
       align: 'center',
     },
   ];
+
   const updateHeight = () => {
     setHeight(window.innerHeight);
   };
 
+  // hàng chậm luân chuyển
+
+  //Chọn tên sản phẩm
   const ChangeSelectTenSP = (value) => {
     setSelectedProduct(value);
+    // Lọc các dòng phù hợp với Ten_SanPham
     const matchedRows = data.filter((record) =>
       record.ItemCode.some((item) => item.Ten_SanPham === value)
     );
-    console.log(matchedRows)
-    // setHighlightedRows(matchedRows.map((row) => row.MaViTriKho));
 
+    // Sắp xếp matchedRows trước theo tuoiTonBTP, sau đó theo maViTriKho
+    const sortedMatchedRows = matchedRows.sort((a, b) => {
+      // Lấy tuổi tồn lớn nhất của Ten_SanPham từ từng record
+      const maxA = Math.max(
+        ...a.ItemCode
+          .filter((item) => item.Ten_SanPham === value)
+          .map((item) => item.tuoiTonBTP || 0)
+      );
+
+      const maxB = Math.max(
+        ...b.ItemCode
+          .filter((item) => item.Ten_SanPham === value)
+          .map((item) => item.tuoiTonBTP || 0)
+      );
+
+      // So sánh tuổi tồn
+      if (maxB !== maxA) {
+        return maxB - maxA; // Tuổi tồn giảm dần
+      }
+
+      // Nếu tuổi tồn bằng nhau, so sánh theo mã vị trí kho
+      const [charA, numA] = [a.MaViTriKho[0], parseInt(a.MaViTriKho.slice(1), 10)];
+      const [charB, numB] = [b.MaViTriKho[0], parseInt(b.MaViTriKho.slice(1), 10)];
+
+      // So sánh chữ cái (A, B, C)
+      if (charA !== charB) {
+        return charA.localeCompare(charB); // A < B < C
+      }
+
+      // So sánh số (101, 102, ...)
+      return numA - numB; // Số tăng dần
+    });
+
+
+    const x = data
+      .map((record) =>
+        record.ItemCode
+          .filter((item) => item.Ten_SanPham === value) // Lọc các phần tử trong ItemCode thỏa mãn điều kiện
+          .map((item) => item.TongTon) // Lấy ra thuộc tính TongTon của các phần tử đã lọc
+      )
+      .flat();
+    setTenSP(value);
+    setTongTon(x[0])
+    setTong({ Ten_SanPham: value, TongTon: x[0] });
+    setChamLC(undefined)
     setListData(value === undefined ? data : matchedRows)
   }
 
@@ -209,7 +332,7 @@ const KhoK3 = (props) => {
 
   const handleClick = (key, key2, key3) => {
     setSelectedKey(key); // Lưu trữ key của ô được nhấp
-    setSelectedMaVT(key2)
+    setselectedMaViTri(key2)
     setSelectedMaviTriKho(key3)
     setIsModalVisible(true); // Hiển thị modal
   };
@@ -219,6 +342,9 @@ const KhoK3 = (props) => {
     setSelectedKey(null); // Xóa key sau khi đóng modal
   };
 
+  const handleModalClose1 = () => {
+    setIsModalVisible1(false);
+  };
   const [threshold, setThreshold] = useState(null);
 
 
@@ -229,6 +355,8 @@ const KhoK3 = (props) => {
 
   const handleClear = () => {
     setViTri([])
+    setTongTon(undefined)
+    setChamLC(undefined)
     setListData(data)
   }
 
@@ -237,7 +365,6 @@ const KhoK3 = (props) => {
       const response = await callAPISearch_();
       const map = new Map();
       const uniqueData = response.data.filter((item) => {
-        // const key = `${item.idViTriKho}_${item.maViTriKho}_${item.itemCode}`;
         const key = `${item.idViTriKho}_${item.maViTriKho}_${item.itemCode}`;
         if (!map.has(key)) {
           map.set(key, true);
@@ -246,32 +373,87 @@ const KhoK3 = (props) => {
         return false;
       });
       setViTri(inputMaVatTu === '' && inputLenhXuatVT === '' ? [] : uniqueData);
-
+      console.log(uniqueData)
       const uniqueMaViTriKho = uniqueData.map(item => item.maViTriKho); // Lấy tất cả MaViTriKho từ uniqueData
 
       const listData = data.filter((item) => uniqueMaViTriKho.includes(item.MaViTriKho));
+
+      const sortedMatchedRows = listData.sort((a, b) => {
+        // Lấy tuổi tồn lớn nhất của Ten_SanPham từ từng record
+        const maxA = Math.max(
+          ...a.ItemCode
+            .filter((item) => item.ItemCode === inputMaVatTu)
+            .map((item) => item.tuoiTonBTP || 0)
+        );
+
+        const maxB = Math.max(
+          ...b.ItemCode
+            .filter((item) => item.ItemCode === inputMaVatTu)
+            .map((item) => item.tuoiTonBTP || 0)
+        );
+
+        // So sánh tuổi tồn
+        if (maxB !== maxA) {
+          return maxB - maxA; // Tuổi tồn giảm dần
+        }
+
+        // Nếu tuổi tồn bằng nhau, so sánh theo mã vị trí kho
+        const [charA, numA] = [a.MaViTriKho[0], parseInt(a.MaViTriKho.slice(1), 10)];
+        const [charB, numB] = [b.MaViTriKho[0], parseInt(b.MaViTriKho.slice(1), 10)];
+
+        // So sánh chữ cái (A, B, C)
+        if (charA !== charB) {
+          return charA.localeCompare(charB); // A < B < C
+        }
+
+        // So sánh số (101, 102, ...)
+        return numA - numB; // Số tăng dần
+      });
+      if (inputLenhXuatVT === "" && inputMaVatTu !== "") {
+        const x = data
+          .map((record) =>
+            record.ItemCode
+              .filter((item) => item.ItemCode === inputMaVatTu) // Lọc các phần tử trong ItemCode thỏa mãn điều kiện
+              .map((item) => ({
+                TongTon: item.TongTon,
+                Ten_SanPham: item.Ten_SanPham,
+              }))
+          )
+          .flat();
+        setTenSP(x[0].Ten_SanPham);
+        setTongTon(x[0].TongTon)
+      }
+
+      if (inputLenhXuatVT !== "") {
+        const filteredData = data
+          .flatMap((record) =>
+            (record.ItemCode || []) // Đảm bảo ItemCode là một mảng
+              .filter((item) =>
+                uniqueData.some((unique) => unique.itemCode === item.ItemCode) // So khớp itemCode
+              )
+              .map((item) => ({
+                TongTon: item.TongTon,
+                Ten_SanPham: item.Ten_SanPham,
+              }))
+          );
+
+        console.log(filteredData);
+        setTenSP(filteredData[0].Ten_SanPham);
+        setTongTon(filteredData[0].TongTon)
+      }
+      if (inputLenhXuatVT === "" && inputMaVatTu === "") {
+        setTongTon(null)
+      }
+      setChamLC(undefined)
       setListData(inputMaVatTu === '' && inputLenhXuatVT === '' ? data : listData)
-      console.log(uniqueData)
     }
     catch (error) {
       console.error('Lỗi khi gọi API:', error);
     }
   }
 
-  const enterFullScreen = () => {
-    const element = document.documentElement; // Lấy phần tử HTML chính
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen(); // Firefox
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen(); // Chrome, Safari, Opera
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen(); // IE/Edge
-    }
-  };
+  // Gọi API và xử lý dữ liệu
   useEffect(() => {
-
     const fetchData = async () => {
       try {
         const response = await callAPILayoutKho_BTP();
@@ -283,77 +465,110 @@ const KhoK3 = (props) => {
         const Ma_DonHang = response.data.map(item => item.maDonHang);
         const Ton = response.data.map(item => item.ton);
         const Ngay_NhapBTP = response.data.map(item => item.ngayNhapBTP);
-        // Lưu dữ liệu vào state  
-        const today = new Date(); // Lấy ngày hiện tại
 
+        const today = new Date();
         const tuoiTonBTP = response.data.map(item => {
-          if (!item.Ngay_NhapBTP || item.ton === 0) {
-            return 0;
-          }
-          const ngayNhap = new Date(item.Ngay_NhapBTP); // Chuyển chuỗi Ngay_NhapBTP thành đối tượng Date
-          const diffTime = today - ngayNhap; // Tính hiệu số thời gian (miliseconds)
-          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // Chuyển đổi từ milliseconds sang số ngày
-          return diffDays; // Trả về số ngày tuổi tồn BTP
+          if (!item.ngayNhapBTP || item.ton === 0) return 0;
+          const ngayNhap = new Date(item.ngayNhapBTP);
+          return Math.floor((today - ngayNhap) / (1000 * 60 * 60 * 24));
         });
 
+        const tonSanPhamMap = response.data.reduce((acc, item) => {
+          const key = `${item.itemCode}-${item.tenSanPham}-${item.maDonHang}`;
+          acc[key] = (acc[key] || 0) + item.ton;
+          return acc;
+        }, {});
+
+        const tonSanPham = response.data.reduce((acc, item) => {
+          const key = `${item.itemCode}-${item.tenSanPham}`;
+          acc[key] = (acc[key] || 0) + item.ton;
+          return acc;
+        }, {});
+
+        // Thêm thuộc tính Ton_SanPham vào mỗi phần tử
+        const dataWithTonSanPham = response.data.map(item => ({
+          ...item,
+          Ton_SanPhamTheoMDH: tonSanPhamMap[`${item.itemCode}-${item.tenSanPham}-${item.maDonHang}`],
+          Ton_SanPham: tonSanPham[`${item.itemCode}-${item.tenSanPham}`]
+        }));
+
+        const TongTonTheoMDH = dataWithTonSanPham.map(item => item.Ton_SanPhamTheoMDH);
+        const TongTon = dataWithTonSanPham.map(item => item.Ton_SanPham);
+
         const formattedData = MaViTriKho.map((MaViTriKho, index) => ({
-          // key: index + 1,
-          rowTitle: `Hàng ${MaViTriKho.slice(0, -2)}`, // Tạo rowTitle dựa vào phần đầu (bỏ 2 chữ số cuối)
-          MaViTriKho: MaViTriKho,
+          rowTitle: `Hàng ${MaViTriKho.slice(0, -2)}`,
+          MaViTriKho,
           PhanTram: PhanTram[index],
           ItemCode: ItemCode[index],
           Checkv: Checkv[index],
           Ten_SanPham: Ten_SanPham[index],
           Ma_DonHang: Ma_DonHang[index],
           Ton: Ton[index],
-          tuoiTonBTP: tuoiTonBTP[index]
+          tuoiTonBTP: tuoiTonBTP[index],
+          Ngay_NhapBTP: Ngay_NhapBTP[index],
+          TongTonTheoMDH: TongTonTheoMDH[index],
+          TongTon: TongTon[index]
         }));
+
         const groupedData = formattedData.reduce((acc, item) => {
-          // Tạo khóa duy nhất dựa vào rowTitle, MaViTriKho, và PhanTram
           const key = `${item.rowTitle}-${item.MaViTriKho}`;
-
-
           if (!acc[key]) {
             acc[key] = {
               rowTitle: item.rowTitle,
               MaViTriKho: item.MaViTriKho,
               PhanTram: item.PhanTram,
-              ItemCode: [] // Khởi tạo mảng để chứa cả ItemCode và Checkv
+              ItemCode: [],
             };
           }
-
-
-          const exists = acc[key].ItemCode.some(i => i.ItemCode === item.ItemCode && i.Checkv === item.Checkv);
-          if (!exists) {
-            acc[key].ItemCode.push({
-              ItemCode: item.ItemCode, Checkv: item.Checkv,
-              Ma_DonHang: item.Ma_DonHang,
-              Ten_SanPham: item.Ten_SanPham,
-              Ton: item.Ton,
-              tuoiTonBTP: item.tuoiTonBTP
-            });
-          }
-
+          acc[key].ItemCode.push({
+            ItemCode: item.ItemCode,
+            Checkv: item.Checkv,
+            Ma_DonHang: item.Ma_DonHang,
+            Ten_SanPham: item.Ten_SanPham,
+            Ton: item.Ton,
+            tuoiTonBTP: item.tuoiTonBTP,
+            Ngay_NhapBTP: item.Ngay_NhapBTP,
+            TongTonTheoMDH: item.TongTonTheoMDH,
+            TongTon: item.TongTon
+          });
           return acc;
         }, {});
-        // Chuyển đổi đối tượng thành mảng
+
         const finalGroupedData = Object.values(groupedData);
         setData(finalGroupedData);
-        setListData(finalGroupedData)
-
+        setListData(finalGroupedData);
+        console.log(finalGroupedData);
       } catch (error) {
         console.error('Lỗi khi gọi API:', error);
       }
     };
 
+    fetchData();
+    // const timer = setTimeout(() => {
+    //   if (buttonRefScreen.current) {
+    //     buttonRefScreen.current.click(); // Click button sau 10 giây
+    //   }
+    // }, 10000);
+    // // Đặt interval để gọi lại mỗi 30 phút
+    // const intervalId = setInterval(() => {
+    //   const now = new Date();
+    //   // Kiểm tra trong ngày (ví dụ từ 8:00 đến 18:00)
+    //   if (now.getHours() >= 8 && now.getHours() <= 18) {
+    //     fetchData();
+    //   }
+    // }, 30 * 60 * 1000); // 30 phút
+  }, []);
+
+  // Lắng nghe thay đổi fullscreen
+  useEffect(() => {
     const handleFullScreenChange = () => {
       setIsFullScreen(
-        document.fullscreenElement ||
+        !!(
+          document.fullscreenElement ||
           document.mozFullScreenElement ||
           document.webkitFullscreenElement ||
           document.msFullscreenElement
-          ? true
-          : false
+        )
       );
     };
 
@@ -362,54 +577,267 @@ const KhoK3 = (props) => {
     document.addEventListener("mozfullscreenchange", handleFullScreenChange);
     document.addEventListener("msfullscreenchange", handleFullScreenChange);
 
-    window.addEventListener("resize", updateHeight);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullScreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullScreenChange);
+      document.removeEventListener("msfullscreenchange", handleFullScreenChange);
+    };
+  }, []);
 
-    fetchData();
-
+  // Theo dõi resize và MutationObserver
+  useEffect(() => {
     const handleResize = () => {
       if (tableRef.current) {
         const tableWidth = tableRef.current.offsetWidth;
-        const tableHeight = tableRef.current.offsetHeight; // Lấy chiều cao của table
         const screenWidth = window.innerWidth;
-        const screenHeight = window.innerHeight; // Lấy chiều cao màn hình
-        // const newScale = (screenHeight - 150) / tableHeight;
-
-        const newScale = (tableWidth * 10 + 30) / ((screenWidth - 250) * 0.75);
-
-        setScale(newScale); // Giới hạn scale tối đa là 1
+        const newScale = isFullScreen
+          ? (tableWidth * 10 + 30) / ((screenWidth - 250) * 0.75)//Hơi đần tý :v
+          : (tableWidth * 10 + 30) / ((screenWidth - 250) * 0.75);
+        setScale(newScale);
       }
     };
 
-    const observer = new MutationObserver(() => {
-      handleResize(); // Gọi resize ngay khi bảng thay đổi DOM
-    });
+    const observer = new MutationObserver(() => handleResize());
 
     if (tableRef.current) {
-      handleResize(); // Gọi ngay lần đầu khi render
-      observer.observe(tableRef.current, { childList: true, subtree: true }); // Theo dõi thay đổi trong bảng
+      observer.observe(tableRef.current, { childList: true, subtree: true });
     }
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      observer.disconnect(); // Hủy theo dõi MutationObserver
-      document.removeEventListener("fullscreenchange", handleFullScreenChange);
-      document.removeEventListener(
-        "webkitfullscreenchange",
-        handleFullScreenChange
-      );
-      document.removeEventListener(
-        "mozfullscreenchange",
-        handleFullScreenChange
-      );
-      document.removeEventListener(
-        "msfullscreenchange",
-        handleFullScreenChange
-      );
+      window.removeEventListener("resize", handleResize);
+      observer.disconnect();
     };
-  }, [])
+  }, [isFullScreen]);
 
+
+  const top5TuoiTon = data
+    .flatMap(item =>
+      item.ItemCode.map(subItem => ({
+        ItemCode: subItem.ItemCode,
+        tuoiTonBTP: subItem.tuoiTonBTP,
+        Ten_SanPham: subItem.Ten_SanPham,
+        Ma_DonHang: subItem.Ma_DonHang,
+        MaViTriKho: item.MaViTriKho
+      }))
+    ) // Biến đổi data để lấy tất cả các ItemCode từ mảng con
+    .filter(item => item.tuoiTonBTP > 0) // Lọc các ItemCode có tuoiTonBTP lớn hơn 0
+    .sort((a, b) => b.tuoiTonBTP - a.tuoiTonBTP) // Sắp xếp theo tuoiTonBTP giảm dần
+    .slice(0, 10); // Lấy 5 phần tử đầu tiên
+
+  const chartOptions = {
+    chart: {
+      type: "bar", // Loại biểu đồ
+      toolbar: { show: false }, // Tắt các công cụ mặc định
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        horizontal: false, // Cột dọc
+      },
+    },
+    dataLabels: {
+      enabled: false, // Tắt số liệu trên cột
+    },
+    xaxis: {
+      categories: top5TuoiTon.map(item => item.MaViTriKho), // MaViTriKho làm nhãn trục X
+      title: {
+        text: "Mã vị trí kho",
+      },
+    },
+    yaxis: {
+      title: {
+        text: "Tuổi tồn BTP",
+      },
+    },
+    tooltip: {
+      custom: function ({ series, seriesIndex, dataPointIndex }) {
+        const item = top5TuoiTon[dataPointIndex];
+        return `
+          <div style="padding: 10px; border: 1px solid #ccc; background: #fff;">
+            <strong>Tên sản phẩm:</strong> ${item.Ten_SanPham || "N/A"}<br/>
+            <strong>Mã vị trí kho:</strong> ${item.MaViTriKho}<br/>
+            <strong>Tuổi tồn:</strong> ${item.tuoiTonBTP}
+          </div>`;
+      },
+    },
+  };
+
+  const chartSeries = [
+    {
+      name: "Tuổi tồn BTP",
+      data: top5TuoiTon.map(item => item.tuoiTonBTP), // tuoiTonBTP làm dữ liệu
+    },
+  ];
+
+
+  useEffect(() => {
+
+    ChamLuanchuyen();
+  }, [ngayChamLC]); // Các phụ thuộc
+  useEffect(() => {
+
+    handleClear();
+  }, []); // Các phụ thuộc
+  const ChamLuanchuyen = () => {
+    // Lọc các dòng phù hợp với Ten_SanPham
+    const matchedRows = data.filter((record) =>
+      record.ItemCode.some((item) => item.tuoiTonBTP > ngayChamLC)
+    );
+
+    // Sắp xếp matchedRows trước theo tuoiTonBTP, sau đó theo maViTriKho
+    const sortedMatchedRows = matchedRows.sort((a, b) => {
+      // Lấy tuổi tồn lớn nhất của Ten_SanPham từ từng record
+      const maxA = Math.max(
+        ...a.ItemCode
+          // .filter((item) => item.Ten_SanPham === value)
+          .map((item) => item.tuoiTonBTP || 0)
+      );
+
+      const maxB = Math.max(
+        ...b.ItemCode
+          // .filter((item) => item.Ten_SanPham === value)
+          .map((item) => item.tuoiTonBTP || 0)
+      );
+
+      // So sánh tuổi tồn
+      if (maxB !== maxA) {
+        return maxB - maxA; // Tuổi tồn giảm dần
+      }
+
+      // Nếu tuổi tồn bằng nhau, so sánh theo mã vị trí kho
+      const [charA, numA] = [a.MaViTriKho[0], parseInt(a.MaViTriKho.slice(1), 10)];
+      const [charB, numB] = [b.MaViTriKho[0], parseInt(b.MaViTriKho.slice(1), 10)];
+
+      // So sánh chữ cái (A, B, C)
+      if (charA !== charB) {
+        return charA.localeCompare(charB); // A < B < C
+      }
+      return numA - numB; // Số tăng dần
+    });
+    const map = new Map();
+    console.log(typeof matchedRows)
+    const mavitri = Object.values(matchedRows).map(item => ({
+      maViTriKho: item.MaViTriKho
+    }));
+    console.log(ngayChamLC)
+    setViTri(mavitri)
+    setTongTon(undefined)
+    setChamLC(true)
+    setListData(matchedRows)
+  }
+  // Biểu đồ hàng chậm luân chuyển
+  const processDataForChart = (data) => {
+    const date = ngayChamLC;
+    // Lọc và nhóm dữ liệu với tuoiTonBTP > 100
+    const overdueItems = data.flatMap(item =>
+      item.ItemCode.filter(subItem => subItem.tuoiTonBTP > date)
+    );
+
+    const overdueGroupedByProduct = overdueItems.reduce((acc, item) => {
+      const { Ten_SanPham, Ton } = item;
+      acc[Ten_SanPham] = (acc[Ten_SanPham] || 0) + Ton;
+      return acc;
+    }, {});
+
+
+    // Tổng số lượng tồn quá hạn
+    const totalOverdueTon = Object.values(overdueGroupedByProduct).reduce((sum, ton) => sum + ton, 0);
+
+    // Chuẩn bị dữ liệu hàng quá hạn
+    const overdueChartData = Object.entries(overdueGroupedByProduct).map(([Ten_SanPham, Ton]) => ({
+      name: `${Ten_SanPham}`,
+      value: Ton
+    }));
+
+    // Lọc và tính tổng hàng trong hạn (tuoiTonBTP <= 100)
+    const withinLimitItems = data.flatMap(item =>
+      item.ItemCode.filter(subItem => subItem.tuoiTonBTP <= date)
+    );
+    const totalWithinLimitTon = withinLimitItems.reduce((sum, item) => sum + item.Ton, 0);
+
+    // Tổng số lượng
+    const totalTon = totalOverdueTon + totalWithinLimitTon;
+
+    // Tính phần trăm nhóm hàng trong hạn
+    const withinLimitChartData = {
+      name: 'Trong hạn ',
+      value: totalWithinLimitTon,
+    };
+
+    // Kết hợp dữ liệu
+    const chartData = [
+      ...overdueChartData,
+    ];
+
+    return chartData;
+  };
+
+  // Gọi hàm với dữ liệu
+  const chartData = processDataForChart(data);
+
+  const chartData_ = chartData.filter(item => item.name !== '');
+  // Tăng số lượng màu khi có nhiều loại hơn danh sách `colors`
+
+  const updateColors = (colors, length) => {
+    // Nếu thiếu màu, thêm các màu ngẫu nhiên
+    while (colors.length < length) {
+      colors.push(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`); // Đảm bảo đủ 6 ký tự
+    }
+    // Nếu dư màu, cắt bỏ phần dư
+    if (colors.length > length) {
+      colors.length = length;
+    }
+    return colors;
+  };
+
+
+  const updatedColors = updateColors(colorsArray, chartData_.length);
+
+  const chartOptions_TonQuaHan = {
+    series: chartData_.map(item => item.value),
+    options: {
+      chart: {
+        type: 'pie',
+      },
+      title: {
+        text: 'Báo cáo hàng chậm luân chuyển',
+        align: 'center',
+        margin: 2,
+        style: {
+          fontSize: '16px',
+          fontWeight: 'bold',
+          color: '#333'
+        }
+      },
+      legend: {
+        // position: "right",
+        // markers: {
+        //   radius: 12, // Đổi hình tròn nhỏ trong legend
+        // },
+        formatter: function (legendName, opts) {
+          // Rút gọn tên nếu dài hơn 20 ký tự
+          const maxLength = 20;
+          return legendName.length > maxLength
+            ? `${legendName.substring(0, maxLength)}...`
+            : legendName;
+        },
+      },
+      labels: chartData_.map(item => item.name),
+      dataLabels: {
+        enabled: true,
+        drop: true,
+        style: {
+          fontSize: '10px', // 
+        },
+        distance: '20px',
+      },
+      colors: updatedColors
+    },
+  };
+  // Biểu đồ đầy kho
   const countEqual0 = data.filter(item => item.PhanTram == 0).length;
   const countGreaterThan0 = data.filter(item => item.PhanTram > 0 && item.PhanTram <= 85).length;
   const countLessThan100 = data.filter(item => item.PhanTram > 85 && item.PhanTram < 100).length;
@@ -610,7 +1038,6 @@ const KhoK3 = (props) => {
                     (item) => item.maViTriKho === record.MaViTriKho
                   );
                   const isHighlighted2 = record.ItemCode.some(
-                    // (item) => item.maViTriKho === record.MaViTriKho
                     (item) => item.Ten_SanPham === selectedProduct
                   );
                   return (
@@ -640,7 +1067,7 @@ const KhoK3 = (props) => {
     });
     return [
       {
-        title: <div style={{ transform: 'rotate(180deg)', whiteSpace: 'nowrap', textAlign: 'center', fontSize: '16px' }}>
+        title: <div style={{ transform: 'rotate(180deg)', whiteSpace: 'nowrap', textAlign: 'center', fontSize: '40px' }}>
           Dãy {keyPrefix}
         </div>,
         children: columns
@@ -671,13 +1098,23 @@ const KhoK3 = (props) => {
           show: false
         }
       },
-      stroke: {
-        show: true,  // Hiển thị viền
-        width: 0.5,
-        colors: ['#000'], // Màu viền đen
+      title: {
+        text: 'Báo cáo đầy kho',
+        align: 'center', // can be 'left', 'center', or 'right'
+        margin: 10,
+        style: {
+          fontSize: '16px',
+          fontWeight: 'bold',
+          color: '#333'
+        }
       },
+      // stroke: {
+      //   show: true,  // Hiển thị viền
+      //   width: 0.5,
+      //   colors: ['#000'], // Màu viền đen
+      // },
       labels: labels,
-      colors: ['#fff', '#3ca63cc4', '#fcff4dc4', '#db3d3dcc'],
+      colors: ['#ffffff', '#3ca63cc4', '#fcff4dc4', '#db3d3dcc'],
       legend: {
         // show: false
         fontSize: '10px'
@@ -706,313 +1143,777 @@ const KhoK3 = (props) => {
   }
   return (
     <>
-      <Row className="rowgap-vbox" gutter={[24, 0]}>
-        <Col
-          xs={24}
-          sm={24}
-          md={12}
-          lg={12}
-          xl={12}
-          className="mb-24"
-        >
-          <Card bordered={false} className="criclebox "
-          // style={{ position: 'relative', top: 10, left: '30%', position: 'fixed', zIndex: 2 }}
-          >
-            <Row align="middle" justify="space-around" gutter={[24, 0]}>
-              <Col xs={8}>
-                <Input
-                  type="text"
-                  placeholder="Lệnh xuất BTP"
-                  value={inputLenhXuatVT}
-                  onChange={handleInputLenhXuatVTChange}
-                  prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
-                  style={{ borderRadius: '6px' }}
-                />
-              </Col>
-              <Col xs={8}>
-                <Input
-                  type="text"
-                  placeholder="ItemCode"
-                  value={inputMaVatTu}
-                  onChange={handleInputMaVatTuChange}
-                  prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
-                  style={{ borderRadius: '6px' }}
-                />
-              </Col>
-              <Col xs={3}>
-                <Button type="primary" onClick={handleSubmit} >
-                  Search
-                </Button>
-              </Col>
-              <Col xs={3}>
-                <Button type="" onClick={handleClear} >
-                  Clear
-                </Button>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-        <Col xs={6}>
-          <Card bordered={false} className="criclebox ">
-            <Select
-              showSearch
-              size="large"
-              onChange={ChangeSelectTenSP}
-              allowClear
-              placeholder="Tên sản phẩm"
-              // mode="multiple"
-              style={{ width: '100%' }}
-              options={optionsSelect}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      <Row gutter={[24, 0]}>
-        <Col xs={24} sm={24} md={12} lg={12} className="mb-24" style={{ marginTop: 12, marginBottom: 12 }}>
-          <Card bordered={false} className="criclebox h-full" style={{ height: 200, width: 300, backgroundColor: '#c8c8c8' }}>
-            <ReactApexChart options={config.options} series={config.series} type="pie" width={280} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={24} md={12} lg={12} xl={19} className="mb-24">
-          <Card bordered={false} className="criclebox h-full" style={{
-            // transform: "scale(0.3)",
-            transform: `scale(${100 / scale}%) `,
-            // transformOrigin: 'top center',
-            transformOrigin: 'top left',
-            width: `${120 * scale}%`, overflow: 'hidden'
-          }}>
-            <div className="linechart">
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <Title level={1}>SƠ ĐỒ KHO</Title>
-              </div>
-              <div className="sales">
-              </div>
-            </div>
-            <div className="Layout_Kho" style={{ width: '100%', flexGrow: 1, marginTop: 10 }}>
-              <TransformWrapper >
-                <TransformComponent >
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ display: 'flex' }}>
-                      <div style={{
-                        display: 'inline-block', transform: 'rotate(-180deg)',
-                        marginRight: 30
-                      }}
-                        ref={tableRef}>
-                        <Table
-                          columns={columns_A}
-                          bordered
-                          dataSource={result_A}
-                          pagination={false}
-                          rowKey="key"
-                          scroll={{
-                            x: 'max-content',
-                          }}
-
-                        />
-                      </div>
-                      <div style={{
-                        display: 'inline-block', transform: 'rotate(-180deg)',
-                        marginRight: 30
-                      }}
-                        ref={tableRef}>
-                        <Table
-                          columns={columns_B}
-                          bordered
-                          dataSource={result_B}
-                          pagination={false}
-                          rowKey="key"
-                        />
-                      </div>
-                      <div style={{
-                        display: 'inline-block', transform: 'rotate(-180deg)',
-                        marginRight: 30
-                      }}
-                        ref={tableRef}>
-                        <Table
-                          columns={columns_C}
-                          bordered
-                          dataSource={result_C}
-                          pagination={false}
-                          rowKey="key"
-                        />
-                      </div>
-                      <div style={{
-                        display: 'inline-block', transform: 'rotate(-180deg)',
-                        marginRight: 30
-                      }}
-                        ref={tableRef}>
-                        <Table
-                          columns={columns_D}
-                          bordered
-                          dataSource={result_D}
-                          pagination={false}
-                          rowKey="key"
-                        />
-                      </div>
-                      <div style={{
-                        display: 'inline-block', transform: 'rotate(-180deg)',
-                        marginRight: 30
-                      }}
-                        ref={tableRef}>
-                        <Table
-                          columns={columns_E}
-                          bordered
-                          dataSource={result_E}
-                          pagination={false}
-                          rowKey="key"
-                        />
-                      </div>
-                      <div style={{
-                        display: 'inline-block', transform: 'rotate(-180deg)',
-                        marginRight: 30
-                      }}
-                        ref={tableRef}>
-                        <Table
-                          columns={columns_F}
-                          bordered
-                          dataSource={result_F}
-                          pagination={false}
-                          rowKey="key"
-                        />
-                      </div>
-                      <div style={{
-                        display: 'inline-block', transform: 'rotate(-180deg)',
-                        marginRight: 30
-                      }}
-                        ref={tableRef}>
-                        <Table
-                          columns={columns_G}
-                          bordered
-                          dataSource={result_G}
-                          pagination={false}
-                          rowKey="key"
-                        />
-                      </div>
-                      <div style={{
-                        display: 'inline-block', transform: 'rotate(-180deg)',
-                        marginRight: 30
-                      }}
-                        ref={tableRef}>
-                        <Table
-                          columns={columns_H}
-                          bordered
-                          dataSource={result_H}
-                          pagination={false}
-                          rowKey="key"
-                        />
-                      </div>
-                      <div style={{
-                        display: 'inline-block', transform: 'rotate(-180deg)',
-                        marginRight: 30
-                      }}
-                        ref={tableRef}>
-                        <Table
-                          columns={columns_I}
-                          bordered
-                          dataSource={result_I}
-                          pagination={false}
-                          rowKey="key"
-                        />
-                      </div>
-                      <div style={{
-                        display: 'inline-block', transform: 'rotate(-180deg)',
-                        marginRight: 30
-                      }}
-                        ref={tableRef}>
-                        <Table
-                          className='duy'
-                          columns={columns_J}
-                          bordered
-                          dataSource={result_J}
-                          pagination={false}
-                          rowKey="key"
-                        />
-                      </div>
-                    </div>
-                    <Modal
-                      title={`Mã vị trí kho: ${selectedMaViTriKho || 'N/A'}`}
-                      visible={isModalVisible}
-                      onCancel={handleModalClose}
-                      onOk={handleModalClose}
-                      width={"70%"}
-                    >
-                      <p>Phần trăm: {selectedKey} %</p>
-                      <Table
-                        columns={columnsMaVT}
-                        dataSource={DataMaVT}
-                        pagination={false}
-                      // size="middle"
-                      />
-                    </Modal>
-                  </div>
-                </TransformComponent>
-              </TransformWrapper >
-            </div>
-          </Card>
-        </Col>
-
-      </Row >
-      <Row gutter={[24, 0]}>
-        <Card
-          style={{
-            position: 'absolute',
-            top: 10,
-            left: -250,
-            width: 240,
-            height: window.innerHeight - 20,
-            overflow: 'hidden',
-            zIndex: 10,
-          }}
-        >
-          <div >
-            <h1
-              style={{
-                fontSize: '16px',
-                textAlign: 'center',
-                margin: '10px 0',
-              }}
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 10,
+          zIndex: 1000,
+          cursor: "pointer",
+          fontSize: "24px",
+          backgroundColor: "white",
+          border: "1px solid #d9d9d9",
+          borderRadius: "4px",
+          padding: "5px 10px",
+        }}
+        onClick={toggleFullScreen}
+      >
+        {isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 70,
+          zIndex: 1000,
+        }}
+      >
+        <Button ref={buttonRefScreen} onClick={toggleDiv}>
+          {isDivVisible ? "Mở rộng sơ đồ" : "Thu nhỏ sơ đồ"}
+        </Button>
+      </div>
+      <Row gutter={[24, 0]} style={{ paddingTop: 20, paddingBottom: 10, marginLeft: !isDivVisible ? -250 : 0, }}>
+        <Col span={24} md={6}>
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              Pages
+            </Breadcrumb.Item>
+            <Breadcrumb.Item style={{ textTransform: "capitalize" }}>
+              Kho kinh tế - quốc phòng
+            </Breadcrumb.Item>
+          </Breadcrumb>
+          <div className="ant-page-header-heading">
+            <span
+              className="ant-page-header-heading-title"
+              style={{ textTransform: "capitalize" }}
             >
-              Danh sách Vị trí Kho
-            </h1>
-            <div style={{ maxHeight: window.innerHeight - 80, overflowY: 'auto' }}>
-              <List
-                dataSource={listData}
-                renderItem={(record) => (
-                  <List.Item
-                    onClick={() => handleClick(record.PhanTram, record.ItemCode, record.MaViTriKho)} // Sự kiện click
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      cursor: 'pointer',
-                      border: '1px solid #f0f0f0',
-                      borderRadius: '8px',
-                      margin: '5px 10px',
-                      padding: '10px',
-                      backgroundColor: '#fff',
-                      userSelect: 'none', // Ngăn chặn chọn văn bản,
-                      transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
+              Kho kinh tế - quốc phòng
+            </span>
+          </div>
+        </Col>
+      </Row >
+      {isDivVisible && (
+        <Row className="rowgap-vbox" gutter={[24, 0]}>
+          <Col
+            xs={24}
+            sm={24}
+            md={12}
+            lg={12}
+            xl={12}
+            className="mb-24"
+          >
+            <Card bordered={false} className="criclebox "
+              style={{ marginBottom: -25 }}
+            >
+              <Row align="middle" justify="space-around" gutter={[24, 0]}>
+                <Col xs={8}>
+                  <Input
+                    type="text"
+                    placeholder="Lệnh xuất BTP"
+                    value={inputLenhXuatVT}
+                    onChange={handleInputLenhXuatVTChange}
+                    prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
+                    style={{ borderRadius: '6px' }}
+                  />
+                </Col>
+                <Col xs={8}>
+                  <Input
+                    type="text"
+                    placeholder="ItemCode"
+                    value={inputMaVatTu}
+                    onChange={handleInputMaVatTuChange}
+                    prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
+                    style={{ borderRadius: '6px' }}
+                  />
+                </Col>
+                <Col xs={3}>
+                  <Button type="primary" onClick={handleSubmit} >
+                    Search
+                  </Button>
+                </Col>
+                <Col xs={3}>
+                  <Button type="" onClick={handleClear} >
+                    Clear
+                  </Button>
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+          <Col xs={6}>
+            <Card bordered={false} className="criclebox ">
+              <Select
+                showSearch
+                size="large"
+                onChange={ChangeSelectTenSP}
+                allowClear
+                placeholder="Tên sản phẩm"
+                // mode="multiple"
+                style={{ width: '100%' }}
+                options={optionsSelect}
+              />
+            </Card>
+          </Col>
+        </Row>
+      )
+      }
+      {
+        isDivVisible && (
+          <Row gutter={[24, 0]}>
+            <Col xs={24} sm={24} md={12} lg={12} xl={6} className="mb-24" style={{ marginTop: 12, marginBottom: 12, marginRight: 10 }}>
+              <Card bordered={false} className="criclebox h-full" style={{ height: 200, width: 350, backgroundColor: '#c8c8c8' }}>
+                <ReactApexChart options={config.options} series={config.series} type="pie" width={300} />
+              </Card>
+            </Col>
+            {/* <Col xs={24} sm={24} md={12} lg={12} xl={8} className="mb-24" style={{ marginTop: 12, marginBottom: 12 }}>
+              <Card bordered={false} className="criclebox h-full" style={{ height: 200 }}>
+                <ReactApexChart
+                  options={chartOptions}
+                  series={chartSeries}
+                  type="bar"
+                  height={180}
+                />
+              </Card>
+            </Col> */}
+            <Col xs={24} sm={24} md={12} lg={12} xl={6} className="mb-24" style={{ marginTop: 12, marginBottom: 12 }}>
+              <Card bordered={false} style={{ height: 200, width: 510, backgroundColor: '#c8c8c8', display: "flex" }}>
+                <div style={{ display: "flex" }}>
+
+                  <div >
+                    <Button
+                      style={{ margin: "10px 0px" }}
+                      onClick={() => {
+                        setNgayChamLC(30);
+                        // ChamLuanchuyen();
+                      }}
+                    >
+                      1 tháng
+                    </Button>
+                    <Button
+                      style={{ margin: "10px 0px" }}
+                      onClick={() => {
+                        setNgayChamLC(90);
+                        // ChamLuanchuyen();
+                      }}
+                    >
+                      3 tháng
+                    </Button>
+                    <Button
+                      style={{ margin: "10px 0px" }}
+                      onClick={() => {
+                        setNgayChamLC(180);
+                        // ChamLuanchuyen();
+                      }}
+                    >
+                      6 tháng
+                    </Button>
+                  </div>
+                  {/* <Modal
+                    visible={isModalVisible1}
+                    onCancel={handleModalClose1}
+                    onOk={handleModalClose1}
+                    width={"70%"}
+                  >
+                    <p>Phần trăm: {selectedKey} %</p>
+                    <Table
+                      columns={columnsMaVT}
+                      dataSource={DataMaViTri1}
+                      pagination={false}
+                    // size="middle"
+                    />
+                  </Modal> */}
+                  <ReactApexChart
+                    options={chartOptions_TonQuaHan.options}
+                    series={chartOptions_TonQuaHan.series}
+                    type="pie"
+                    width="400"
+                  />
+                </div>
+              </Card>
+            </Col>
+            <Col xs={24} sm={24} md={12} lg={12} xl={19} className="mb-24">
+              <div className="linechart" style={{ display: 'flex', justifyContent: 'center' }}>
+                <div >
+                  <Title level={3}>SƠ ĐỒ KHO KINH TẾ - QUỐC PHÒNG (K3)</Title>
+                </div>
+              </div>
+              <Card bordered={false} className="criclebox h-full" style={{
+                // transform: "scale(0.3)",
+                transform: `scale(${90 / scale}%) `,
+                // transformOrigin: 'top center',
+                transformOrigin: 'top left',
+                width: `${130 * scale}%`, overflow: 'hidden',
+                display: 'flex', justifyContent: 'center'
+              }}>
+                {/* <div className="linechart" style={{ display: 'flex', justifyContent: 'center' }}>
+                  <div >
+                    <Title level={1}>SƠ ĐỒ KHO KINH TẾ - QUỐC PHÒNG (K3)</Title>
+                  </div>
+                </div> */}
+                <div className="Layout_Kho" style={{ width: '100%', flexGrow: 1, marginTop: 10 }}>
+                  <TransformWrapper
+                    wheel={{
+                      step: 0.1, // Tốc độ zoom
+                      activationKeys: [], // Không yêu cầu phím bổ sung để zoom
+                      disabled: false, // Kích hoạt thu phóng bằng chuột
+                      wheelZoomPosition: "mouse", // Thu phóng theo vị trí chuột
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#e6f7ff';
-                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#fff';
-                      e.currentTarget.style.boxShadow = 'none';
+                    zoomAnimation={{
+                      animationType: "easeOut", // Loại hoạt ảnh
+                      animationTime: 200, // Thời gian hoạt ảnh (ms)
                     }}
                   >
-                    <strong style={{ fontSize: '14px' }}>{record.MaViTriKho}</strong>
-                    <small style={{ color: '#888' }}>{record.PhanTram}%</small>
-                  </List.Item>
+                    <TransformComponent >
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ display: 'flex' }}>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_A}
+                              bordered
+                              dataSource={result_A}
+                              pagination={false}
+                              rowKey="key"
+                              scroll={{
+                                x: 'max-content',
+                              }}
+
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_B}
+                              bordered
+                              dataSource={result_B}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_C}
+                              bordered
+                              dataSource={result_C}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_D}
+                              bordered
+                              dataSource={result_D}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_E}
+                              bordered
+                              dataSource={result_E}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_F}
+                              bordered
+                              dataSource={result_F}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_G}
+                              bordered
+                              dataSource={result_G}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_H}
+                              bordered
+                              dataSource={result_H}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_I}
+                              bordered
+                              dataSource={result_I}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_J}
+                              bordered
+                              dataSource={result_J}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                        </div>
+                        <Modal
+                          title={`Mã vị trí kho: ${selectedMaViTriKho || 'N/A'}`}
+                          visible={isModalVisible}
+                          onCancel={handleModalClose}
+                          onOk={handleModalClose}
+                          width={"70%"}
+                        >
+                          <p>Phần trăm: {selectedKey} %</p>
+                          <Table
+                            columns={columnsMaVT}
+                            dataSource={DataMaViTri}
+                            pagination={false}
+                          // size="middle"
+                          />
+                        </Modal>
+                      </div>
+                    </TransformComponent>
+                  </TransformWrapper >
+                </div>
+              </Card>
+            </Col>
+          </Row >
+        )
+      }
+      {
+        isDivVisible && (
+          <Row gutter={[24, 0]}>
+            <Card
+              style={{
+                position: 'absolute',
+                top: 10,
+                left: -250,
+                width: 240,
+                height: window.innerHeight - 20,
+                overflow: 'hidden',
+                zIndex: 10,
+              }}
+            >
+              <div >
+                <h1
+                  style={{
+                    fontSize: '16px',
+                    textAlign: 'center',
+                    margin: '10px 0',
+                  }}
+                >
+                  Danh sách Vị trí Kho
+                </h1>
+                {tongTon && (
+                  <div
+                    style={{
+                      // position: "fixed",
+                      padding: "15px",
+                      backgroundColor: "#fff",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                      borderRadius: "8px",
+                      zIndex: 1000,
+                      border: "1px solid #f0f0f0",
+                    }}
+                  >
+                    <p>
+                      <strong>Tên sản phẩm: </strong>
+                      {tenSP}
+                    </p>
+                    <strong>Tổng tồn: </strong>{tongTon}
+                  </div>
                 )}
-              />
-            </div>
-          </div>
-        </Card>
+                {chamLC && (
+                  <div
+                    style={{
+                      // position: "fixed",
+                      padding: "15px",
+                      backgroundColor: "#fff",
+                      boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                      borderRadius: "8px",
+                      zIndex: 1000,
+                      border: "1px solid #f0f0f0",
+                    }}
+                  >
+                    <p style={{ textAlign: 'center' }}>
+                      <strong>Vị trí chứa hàng chậm luân chuyển </strong>
+                    </p>
+                  </div>
+                )}
+                <div style={{ maxHeight: window.innerHeight - 200, overflowY: 'auto' }}>
+                  <List
+                    dataSource={listData}
+                    renderItem={(record) => (
+                      <List.Item
+                        onClick={() => handleClick(record.PhanTram, record.ItemCode, record.MaViTriKho)} // Sự kiện click
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          cursor: 'pointer',
+                          border: '1px solid #f0f0f0',
+                          borderRadius: '8px',
+                          margin: '5px 10px',
+                          padding: '10px',
+                          backgroundColor: '#fff',
+                          userSelect: 'none', // Ngăn chặn chọn văn bản,
+                          transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#e6f7ff';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#fff';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      >
+                        <strong style={{ fontSize: '14px' }}>{record.MaViTriKho}</strong>
+                        <small style={{ color: '#888' }}>{record.PhanTram}%</small>
+                      </List.Item>
+                    )}
+                  />
+                </div>
+              </div>
+            </Card>
 
-      </Row >
+          </Row >
+        )
+      }
+      {
+        !isDivVisible && (
+          <Row gutter={[24, 0]}>
+            <Col xs={24} sm={24} md={12} lg={12} xl={19} className="mb-24">
+              <div className="linechart" style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+                <div >
+                  <Title level={1}>SƠ ĐỒ KHO KINH TẾ - QUỐC PHÒNG (K3)</Title>
+                </div>
+              </div>
+              <Card bordered={false} className="criclebox h-full" style={{
+                // transform: "scale(0.3)",
+                marginLeft: -250,
+                marginTop: 0,
+                transform: `scale(${130 / scale}%) `, //110
+                // transformOrigin: 'top center',
+                transformOrigin: 'top left',
+                width: `${113 * scale}%`, overflow: 'hidden' //130
+              }}>
+                <div style={{ display: 'flex' }}>
+                  <div className="container" style={{ marginLeft: 600 }}>
+                    <div className="arrow-body"></div>
+                    <div className="arrow-head-r"></div>
+                  </div>
+                  <div className="container" style={{ marginLeft: 650 }}>
+                    <div className="arrow-head-l"></div>
+                    <div className="arrow-body" ></div>
+                  </div>
+                  <div className="container" style={{ marginLeft: 400 }}>
+                    <div className="arrow-body"></div>
+                    <div className="arrow-head-r"></div>
+                  </div>
+                </div>
+                <div className="Layout_Kho" style={{ width: '100%', flexGrow: 1, marginTop: 10 }}>
+                  <TransformWrapper
+                    wheel={{
+                      step: 0.1, // Tốc độ zoom
+                      activationKeys: [], // Không yêu cầu phím bổ sung để zoom
+                      disabled: false, // Kích hoạt thu phóng bằng chuột
+                      wheelZoomPosition: "mouse", // Thu phóng theo vị trí chuột
+                    }}
+                    zoomAnimation={{
+                      animationType: "easeOut", // Loại hoạt ảnh
+                      animationTime: 200, // Thời gian hoạt ảnh (ms)
+                    }}
+                  >
+                    <TransformComponent >
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ display: 'flex' }}>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            // marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_A}
+                              bordered
+                              dataSource={result_A}
+                              pagination={false}
+                              rowKey="key"
+                              scroll={{
+                                x: 'max-content',
+                              }}
 
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            // marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_B}
+                              bordered
+                              dataSource={result_B}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div className="container_" >
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
+                              <div className="arrow-body_"></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <div className="arrow-head-d"></div>
+                            </div>
+                            {/*  */}
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 1300 }}>
+                              <div className="arrow-head-u"></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <div className="arrow-body_"></div>
+                            </div>
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            // marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_C}
+                              bordered
+                              dataSource={result_C}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            // marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_D}
+                              bordered
+                              dataSource={result_D}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div className="container_" >
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
+                              <div className="arrow-body_"></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <div className="arrow-head-d"></div>
+                            </div>
+                            {/*  */}
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 1300 }}>
+                              <div className="arrow-head-u"></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <div className="arrow-body_"></div>
+                            </div>
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            // marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_E}
+                              bordered
+                              dataSource={result_E}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            // marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_F}
+                              bordered
+                              dataSource={result_F}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div className="container_" >
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
+                              <div className="arrow-body_"></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <div className="arrow-head-d"></div>
+                            </div>
+                            {/*  */}
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 1300 }}>
+                              <div className="arrow-head-u"></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <div className="arrow-body_"></div>
+                            </div>
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            // marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_G}
+                              bordered
+                              dataSource={result_G}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            // marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_H}
+                              bordered
+                              dataSource={result_H}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div className="container_" >
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
+                              <div className="arrow-body_"></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <div className="arrow-head-d"></div>
+                            </div>
+                            {/*  */}
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 1300 }}>
+                              <div className="arrow-head-u"></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <div className="arrow-body_"></div>
+                            </div>
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            // marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              columns={columns_I}
+                              bordered
+                              dataSource={result_I}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                          <div style={{
+                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            marginRight: 30
+                          }}
+                            ref={tableRef}>
+                            <Table
+                              className='duy'
+                              columns={columns_J}
+                              bordered
+                              dataSource={result_J}
+                              pagination={false}
+                              rowKey="key"
+                            />
+                          </div>
+                        </div>
+
+                        <Modal
+                          title={`Mã vị trí kho: ${selectedMaViTriKho || 'N/A'}`}
+                          visible={isModalVisible}
+                          onCancel={handleModalClose}
+                          onOk={handleModalClose}
+                          width={"70%"}
+                        >
+                          <p>Phần trăm: {selectedKey} %</p>
+                          <Table
+                            columns={columnsMaVT}
+                            dataSource={DataMaViTri}
+                            pagination={false}
+                          // size="middle"
+                          />
+                        </Modal>
+                      </div>
+                    </TransformComponent>
+                  </TransformWrapper>
+                </div>
+                <div style={{ display: 'flex' }}>
+                  <div className="container" style={{ marginLeft: 100 }}>
+                    <div className="arrow-body"></div>
+                    <div className="arrow-head-r"></div>
+                  </div>
+                  <div className="container" style={{ marginLeft: 570 }}>
+                    <div className="arrow-body"></div>
+                    <div className="arrow-head-r"></div>
+                  </div>
+                  <div className="container" style={{ marginLeft: 480 }}>
+                    <div className="arrow-head-l"></div>
+                    <div className="arrow-body" ></div>
+                  </div>
+                  <div className="container" style={{ marginLeft: 400 }}>
+                    <div className="arrow-body"></div>
+                    <div className="arrow-head-r"></div>
+                  </div>
+                  <div className="container" style={{ marginLeft: 1300 }}>
+                    <div className="arrow-head-l"></div>
+                    <div className="arrow-body" ></div>
+                  </div>
+                </div>
+              </Card>
+            </Col>
+          </Row >
+        )
+      }
     </>
   );
 }

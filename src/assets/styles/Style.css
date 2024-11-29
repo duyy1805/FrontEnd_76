@@ -114,7 +114,8 @@
 }
 
 .blink-glow {
-    animation: blink-glow 1s ease-in-out infinite;
+    /* animation: blink-glow 1s ease-in-out infinite; */
+    outline: 2px solid blue;
 }
 
 
@@ -127,4 +128,85 @@
 .ant-modal .ant-table-tbody>tr>td {
     border: 0px;
     font-size: 14px;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* position: relative; */
+    /* height: 200px; */
+    /* Chiều cao toàn bộ layout */
+    /* width: 100%; */
+    /* Chiều dài mũi tên phủ toàn bộ chiều ngang */
+    /* background-color: #f4f4f4; */
+    /* Màu nền */
+}
+
+.container_ {
+    /* display: fle; */
+    /* align-items: center; */
+    justify-content: center;
+    /* position: relative; */
+    /* height: 200px; */
+    /* Chiều cao toàn bộ layout */
+    /* width: 100%; */
+    /* Chiều dài mũi tên phủ toàn bộ chiều ngang */
+    /* background-color: #f4f4f4; */
+    /* Màu nền */
+}
+
+.arrow-body {
+    width: 100px;
+    /* Chiều dài thân mũi tên */
+    height: 20px;
+    /* Độ dày thân mũi tên */
+    background-color: #007bff;
+    /* Màu của mũi tên */
+}
+
+.arrow-body_ {
+    width: 20px;
+    /* Chiều dài thân mũi tên */
+    height: 100px;
+    /* Độ dày thân mũi tên */
+    background-color: #007bff;
+    /* Màu của mũi tên */
+}
+
+.arrow-head-r {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 20px 0 20px 20px;
+    /* Định hình tam giác */
+    border-color: transparent transparent transparent #007bff;
+    /* Màu của đầu mũi tên */
+}
+
+.arrow-head-l {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 20px 20px 20px 20px;
+    border-color: transparent #007bff transparent transparent;
+
+}
+
+.arrow-head-u {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 20px 20px 20px 20px;
+    border-color: transparent transparent #007bff transparent;
+
+}
+
+.arrow-head-d {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 20px 20px 20px 20px;
+    border-color: #007bff transparent transparent transparent;
+
 }
