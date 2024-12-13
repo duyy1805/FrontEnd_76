@@ -10,8 +10,8 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 import {
-  Row,
-  Col,
+  Row, Tooltip,
+  Col, Modal,
   Card,
   Radio,
   Table,
@@ -19,641 +19,339 @@ import {
   message,
   Progress,
   Button,
-  Avatar,
+  Avatar, Breadcrumb,
   Typography,
 } from "antd";
 
 import { ToTopOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-
+import moment from 'moment';
 // Images
-import ava1 from "../assets/images/logo-shopify.svg";
-import ava2 from "../assets/images/logo-atlassian.svg";
-import ava3 from "../assets/images/logo-slack.svg";
-import ava5 from "../assets/images/logo-jira.svg";
-import ava6 from "../assets/images/logo-invision.svg";
-import face from "../assets/images/face-1.jpg";
-import face2 from "../assets/images/face-2.jpg";
-import face3 from "../assets/images/face-3.jpg";
-import face4 from "../assets/images/face-4.jpg";
-import face5 from "../assets/images/face-5.jpeg";
-import face6 from "../assets/images/face-6.jpeg";
-import pencil from "../assets/images/pencil.svg";
-
+import "../assets/styles/Style.css"
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import apiConfig from '../../src/apiConfig.json'
 const { Title } = Typography;
 
-const formProps = {
-  name: "file",
-  action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
-  headers: {
-    authorization: "authorization-text",
-  },
-  onChange(info) {
-    if (info.file.status !== "uploading") {
-      console.log(info.file, info.fileList);
-    }
-    if (info.file.status === "done") {
-      message.success(`${info.file.name} file uploaded successfully`);
-    } else if (info.file.status === "error") {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-};
-// table code start
-const columns = [
-  {
-    title: "AUTHOR",
-    dataIndex: "name",
-    key: "name",
-    width: "32%",
-  },
-  {
-    title: "FUNCTION",
-    dataIndex: "function",
-    key: "function",
-  },
 
-  {
-    title: "STATUS",
-    key: "status",
-    dataIndex: "status",
-  },
-  {
-    title: "EMPLOYED",
-    key: "employed",
-    dataIndex: "employed",
-  },
-];
+const callAPIDanhSachChuaDatHang = async () => {
+  try {
 
-const data = [
-  {
-    key: "1",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar
-            className="shape-avatar"
-            shape="square"
-            size={40}
-            src={face2}
-          ></Avatar>
-          <div className="avatar-info">
-            <Title level={5}>Michael John</Title>
-            <p>michael@mail.com</p>
-          </div>
-        </Avatar.Group>{" "}
-      </>
-    ),
-    function: (
-      <>
-        <div className="author-info">
-          <Title level={5}>Manager</Title>
-          <p>Organization</p>
-        </div>
-      </>
-    ),
+    const response = await axios.post(
+      `${apiConfig.API_BASE_URL}/muahang/all`,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return (response)
+  } catch (error) {
+    console.error('Lỗi khi lấy dữ liệu:', error);
+  }
+}
 
-    status: (
-      <>
-        <Button type="primary" className="tag-primary">
-          ONLINE
-        </Button>
-      </>
-    ),
-    employed: (
-      <>
-        <div className="ant-employed">
-          <span>23/04/18</span>
-          <a href="#pablo">Edit</a>
-        </div>
-      </>
-    ),
-  },
+const callAPIDanhSachVatTu = async (idDonHang) => {
+  try {
 
-  {
-    key: "2",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar
-            className="shape-avatar"
-            shape="square"
-            size={40}
-            src={face3}
-          ></Avatar>
-          <div className="avatar-info">
-            <Title level={5}>Alexa Liras</Title>
-            <p>alexa@mail.com</p>
-          </div>
-        </Avatar.Group>{" "}
-      </>
-    ),
-    function: (
-      <>
-        <div className="author-info">
-          <Title level={5}>Programator</Title>
-          <p>Developer</p>
-        </div>
-      </>
-    ),
-
-    status: (
-      <>
-        <Button className="tag-badge">ONLINE</Button>
-      </>
-    ),
-    employed: (
-      <>
-        <div className="ant-employed">
-          <span>23/12/20</span>
-          <a href="#pablo">Edit</a>
-        </div>
-      </>
-    ),
-  },
-
-  {
-    key: "3",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar
-            className="shape-avatar"
-            shape="square"
-            size={40}
-            src={face}
-          ></Avatar>
-          <div className="avatar-info">
-            <Title level={5}>Laure Perrier</Title>
-            <p>laure@mail.com</p>
-          </div>
-        </Avatar.Group>{" "}
-      </>
-    ),
-    function: (
-      <>
-        <div className="author-info">
-          <Title level={5}>Executive</Title>
-          <p>Projects</p>
-        </div>
-      </>
-    ),
-
-    status: (
-      <>
-        <Button type="primary" className="tag-primary">
-          ONLINE
-        </Button>
-      </>
-    ),
-    employed: (
-      <>
-        <div className="ant-employed">
-          <span>03/04/21</span>
-          <a href="#pablo">Edit</a>
-        </div>
-      </>
-    ),
-  },
-  {
-    key: "4",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar
-            className="shape-avatar"
-            shape="square"
-            size={40}
-            src={face4}
-          ></Avatar>
-          <div className="avatar-info">
-            <Title level={5}>Miriam Eric</Title>
-            <p>miriam@mail.com</p>
-          </div>
-        </Avatar.Group>{" "}
-      </>
-    ),
-    function: (
-      <>
-        <div className="author-info">
-          <Title level={5}>Marketing</Title>
-          <p>Organization</p>
-        </div>
-      </>
-    ),
-
-    status: (
-      <>
-        <Button type="primary" className="tag-primary">
-          ONLINE
-        </Button>
-      </>
-    ),
-    employed: (
-      <>
-        <div className="ant-employed">
-          <span>03/04/21</span>
-          <a href="#pablo">Edit</a>
-        </div>
-      </>
-    ),
-  },
-  {
-    key: "5",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar
-            className="shape-avatar"
-            shape="square"
-            size={40}
-            src={face5}
-          ></Avatar>
-          <div className="avatar-info">
-            <Title level={5}>Richard Gran</Title>
-            <p>richard@mail.com</p>
-          </div>
-        </Avatar.Group>{" "}
-      </>
-    ),
-    function: (
-      <>
-        <div className="author-info">
-          <Title level={5}>Manager</Title>
-          <p>Organization</p>
-        </div>
-      </>
-    ),
-
-    status: (
-      <>
-        <Button className="tag-badge">ONLINE</Button>
-      </>
-    ),
-    employed: (
-      <>
-        <div className="ant-employed">
-          <span>23/03/20</span>
-          <a href="#pablo">Edit</a>
-        </div>
-      </>
-    ),
-  },
-
-  {
-    key: "6",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar
-            className="shape-avatar"
-            shape="square"
-            size={40}
-            src={face6}
-          ></Avatar>
-          <div className="avatar-info">
-            <Title level={5}>John Levi</Title>
-            <p>john@mail.com</p>
-          </div>
-        </Avatar.Group>{" "}
-      </>
-    ),
-    function: (
-      <>
-        <div className="author-info">
-          <Title level={5}>Tester</Title>
-          <p>Developer</p>
-        </div>
-      </>
-    ),
-
-    status: (
-      <>
-        <Button className="tag-badge">ONLINE</Button>
-      </>
-    ),
-    employed: (
-      <>
-        <div className="ant-employed">
-          <span>14/04/17</span>
-          <a href="#pablo">Edit</a>
-        </div>
-      </>
-    ),
-  },
-];
-// project table start
-const project = [
-  {
-    title: "COMPANIES",
-    dataIndex: "name",
-    width: "32%",
-  },
-  {
-    title: "BUDGET",
-    dataIndex: "age",
-  },
-  {
-    title: "STATUS",
-    dataIndex: "address",
-  },
-  {
-    title: "COMPLETION",
-    dataIndex: "completion",
-  },
-];
-const dataproject = [
-  {
-    key: "1",
-
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar className="shape-avatar" src={ava1} size={25} alt="" />
-          <div className="avatar-info">
-            <Title level={5}>Spotify Version</Title>
-          </div>
-        </Avatar.Group>
-      </>
-    ),
-    age: (
-      <>
-        <div className="semibold">$14,000</div>
-      </>
-    ),
-    address: (
-      <>
-        <div className="text-sm">working</div>
-      </>
-    ),
-    completion: (
-      <>
-        <div className="ant-progress-project">
-          <Progress percent={30} size="small" />
-          <span>
-            <Link to="/">
-              <img src={pencil} alt="" />
-            </Link>
-          </span>
-        </div>
-      </>
-    ),
-  },
-
-  {
-    key: "2",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar className="shape-avatar" src={ava2} size={25} alt="" />
-          <div className="avatar-info">
-            <Title level={5}>Progress Track</Title>
-          </div>
-        </Avatar.Group>
-      </>
-    ),
-    age: (
-      <>
-        <div className="semibold">$3,000</div>
-      </>
-    ),
-    address: (
-      <>
-        <div className="text-sm">working</div>
-      </>
-    ),
-    completion: (
-      <>
-        <div className="ant-progress-project">
-          <Progress percent={10} size="small" />
-          <span>
-            <Link to="/">
-              <img src={pencil} alt="" />
-            </Link>
-          </span>
-        </div>
-      </>
-    ),
-  },
-
-  {
-    key: "3",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar className="shape-avatar" src={ava3} size={25} alt="" />
-          <div className="avatar-info">
-            <Title level={5}> Jira Platform Errors</Title>
-          </div>
-        </Avatar.Group>
-      </>
-    ),
-    age: (
-      <>
-        <div className="semibold">Not Set</div>
-      </>
-    ),
-    address: (
-      <>
-        <div className="text-sm">done</div>
-      </>
-    ),
-    completion: (
-      <>
-        <div className="ant-progress-project">
-          <Progress percent={100} size="small" format={() => "done"} />
-          <span>
-            <Link to="/">
-              <img src={pencil} alt="" />
-            </Link>
-          </span>
-        </div>
-      </>
-    ),
-  },
-
-  {
-    key: "4",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar className="shape-avatar" src={ava5} size={25} alt="" />
-          <div className="avatar-info">
-            <Title level={5}> Launch new Mobile App</Title>
-          </div>
-        </Avatar.Group>
-      </>
-    ),
-    age: (
-      <>
-        <div className="semibold">$20,600</div>
-      </>
-    ),
-    address: (
-      <>
-        <div className="text-sm">canceled</div>
-      </>
-    ),
-    completion: (
-      <>
-        <div className="ant-progress-project">
-          <Progress
-            percent={50}
-            size="small"
-            status="exception"
-            format={() => "50%"}
-          />
-          <span>
-            <Link to="/">
-              <img src={pencil} alt="" />
-            </Link>
-          </span>
-        </div>
-      </>
-    ),
-  },
-
-  {
-    key: "5",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar className="shape-avatar" src={ava5} size={25} alt="" />
-          <div className="avatar-info">
-            <Title level={5}>Web Dev</Title>
-          </div>
-        </Avatar.Group>
-      </>
-    ),
-    age: (
-      <>
-        <div className="semibold">$4,000</div>
-      </>
-    ),
-    address: (
-      <>
-        <div className="text-sm">working</div>
-      </>
-    ),
-    completion: (
-      <>
-        <div className="ant-progress-project">
-          <Progress percent={80} size="small" />
-          <span>
-            <Link to="/">
-              <img src={pencil} alt="" />
-            </Link>
-          </span>
-        </div>
-      </>
-    ),
-  },
-
-  {
-    key: "6",
-    name: (
-      <>
-        <Avatar.Group>
-          <Avatar className="shape-avatar" src={ava6} size={25} alt="" />
-          <div className="avatar-info">
-            <Title level={5}>Redesign Online Store</Title>
-          </div>
-        </Avatar.Group>
-      </>
-    ),
-    age: (
-      <>
-        <div className="semibold">$2,000</div>
-      </>
-    ),
-    address: (
-      <>
-        <div className="text-sm">canceled</div>
-      </>
-    ),
-    completion: (
-      <>
-        <div className="ant-progress-project">
-          <Progress percent={0} size="small" />
-          <span>
-            <Link to="/">
-              <img src={pencil} alt="" />
-            </Link>
-          </span>
-        </div>
-      </>
-    ),
-  },
-];
-
+    const response = await axios.post(
+      `${apiConfig.API_BASE_URL}/muahang/allbyvt/${idDonHang}`,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return (response)
+  } catch (error) {
+    console.error('Lỗi khi lấy dữ liệu:', error);
+  }
+}
 function Tables() {
-  const onChange = (e) => console.log(`radio checked:${e.target.value}`);
 
+  //state
+  const [data, setData] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [idDonHang, setIdDonHang] = useState('');
+  const [danhSachVatTu, setDanhSachVatTu] = useState([]);
+
+  const handleClick = async (record) => {
+    const response = await callAPIDanhSachVatTu(record.idDonHang);
+    console.log(response)
+    await setDanhSachVatTu(response.data)
+    setIsModalVisible(true); // Hiển thị modal
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await callAPIDanhSachChuaDatHang();
+        const data = response.data
+        const sortedData = data.sort((a, b) => new Date(a.ngayDongBo) - new Date(b.ngayDongBo));
+        setData(sortedData)
+      } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+      }
+    };
+    fetchData();
+
+  }, []);
+
+  const createFilters = (key) => {
+    const uniqueValues = [...new Set(data.map((item) => item[key]))];
+    return uniqueValues.map((value) => ({
+      text: value,
+      value,
+    }));
+  };
+
+  // Tạo bộ lọc
+  const customerFilters = createFilters('tenKhachHang');
+  const productTypeFilters = createFilters('tenChungLoaiSanPham');
+  const orderTypeFilters = createFilters('tenLoaiDonHang');
+  const staffFilters = createFilters('tenDayDu');
+  const orderCodeFilter = createFilters('maDonHang');
+
+  const columns = [
+    // {
+    //   title: 'Chủng Loại Sản Phẩm',
+    //   dataIndex: 'tenChungLoaiSanPham',
+    //   key: 'tenChungLoaiSanPham',
+    //   filters: productTypeFilters,
+    //   onFilter: (value, record) => record.tenChungLoaiSanPham === value,
+    //   ellipsis: { showTitle: false },
+    //   render: (text) => <Tooltip placement="topLeft" title={text}>{text}</Tooltip>,
+    // },
+    // {
+    //   title: 'Loại Đơn Hàng',
+    //   dataIndex: 'tenLoaiDonHang',
+    //   key: 'tenLoaiDonHang',
+    //   filters: orderTypeFilters,
+    //   onFilter: (value, record) => record.tenLoaiDonHang === value,
+    // },
+    // {
+    //   title: 'ID Đơn Hàng',
+    //   dataIndex: 'idDonHang',
+    //   key: 'idDonHang',
+    //   width: "8%",
+    //   align: 'center',
+    // },
+    {
+      title: 'Mã Đơn Hàng',
+      dataIndex: 'maDonHang',
+      key: 'maDonHang',
+      filters: orderCodeFilter,
+      filterSearch: true,
+      onFilter: (value, record) => record.maDonHang.includes(value),
+      ellipsis: { showTitle: false },
+      render: (text) => <Tooltip placement="topLeft" title={text}>{text}</Tooltip>,
+    },
+    {
+      title: 'Ngày Đồng Bộ',
+      dataIndex: 'ngayDongBo',
+      key: 'ngayDongBo',
+      align: 'center',
+      render: (text) => <Tooltip placement="topLeft" title={moment(text).format('DD-MM-YYYY')}>{moment(text).format('DD-MM-YYYY')}</Tooltip>,
+    },
+    {
+      title: 'Ngày Lập',
+      dataIndex: 'ngayLap',
+      key: 'ngayLap',
+      align: 'center',
+      render: (text) => <Tooltip placement="topLeft" title={moment(text).format('DD-MM-YYYY, HH:mm')}>{moment(text).format('DD-MM-YYYY')}</Tooltip>,
+    },
+    {
+      title: 'Số Lượng',
+      dataIndex: 'soLuongSanPham',
+      key: 'soLuongSanPham',
+      width: "10%",
+    },
+    {
+      title: 'Người mở đơn',
+      dataIndex: 'tenDayDu',
+      key: 'tenDayDu',
+      filters: staffFilters,
+      onFilter: (value, record) => record.tenDayDu === value,
+      ellipsis: { showTitle: false },
+      render: (text) => <Tooltip placement="topLeft" title={text}>{text}</Tooltip>,
+    },
+    {
+      title: 'Khách Hàng',
+      dataIndex: 'tenKhachHang',
+      key: 'tenKhachHang',
+      filters: customerFilters,
+      onFilter: (value, record) => record.tenKhachHang === value,
+    },
+  ];
+
+
+  const columnsDSVT = [
+    {
+      title: 'Chủng Loại Vật Tư',
+      dataIndex: 'tenChungLoaiVatTu',
+      key: 'tenChungLoaiVatTu',
+      render: (text) => (
+        <Tooltip title={text}>
+          {text}
+        </Tooltip>
+      ),
+      width: "15%"
+    },
+    {
+      title: 'Mã Vật Tư',
+      dataIndex: 'maVatTu',
+      key: 'maVatTu',
+      align: 'center',
+      width: "10%"
+    },
+    {
+      title: 'Quy Cách',
+      dataIndex: 'quyCach',
+      key: 'quyCach',
+      ellipsis: {
+        showTitle: false, // Ẩn tooltip mặc định
+      },
+      render: (text) => (
+        <Tooltip placement="topLeft" title={text}>
+          {text}
+        </Tooltip>
+      ),
+      width: "30%"
+    },
+    {
+      title: 'Cấp Cho',
+      dataIndex: 'capCho',
+      key: 'capCho',
+      width: "10%"
+    },
+    {
+      title: 'Nhu Cầu Vật Tư',
+      dataIndex: 'nhuCauVatTu',
+      key: 'nhuCauVatTu',
+      align: 'center',
+      width: "12%",
+      render: (text) => text.toLocaleString(), // Hiển thị định dạng số nếu cần
+    },
+    {
+      title: 'Đơn Vị Tính',
+      dataIndex: 'tenDonViTinh',
+      key: 'tenDonViTinh',
+      align: 'center',
+      width: "10%"
+    },
+    {
+      title: 'Nhà Cung Cấp',
+      dataIndex: 'tenNhaCungCap',
+      key: 'tenNhaCungCap',
+      ellipsis: {
+        showTitle: false, // Ẩn tooltip mặc định
+      },
+      render: (text) => (
+        <Tooltip placement="topLeft" title={text}>
+          {text}
+        </Tooltip>
+      ),
+      width: "30%"
+    },
+  ];
+
+  //
   return (
     <>
-      <div className="tabled">
+      <div className="tabled"
+        style={{ padding: 10 }}
+      >
+        <Row gutter={[24, 0]}
+          style={{
+            paddingLeft: 10,
+            paddingBottom: 10
+          }}>
+          <Col span={24} md={6}>
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                Pages
+              </Breadcrumb.Item>
+              <Breadcrumb.Item style={{ textTransform: "capitalize" }}>
+                Đơn hàng
+              </Breadcrumb.Item>
+            </Breadcrumb>
+            <div className="ant-page-header-heading">
+              <span
+                className="ant-page-header-heading-title"
+                style={{ textTransform: "capitalize" }}
+              >
+                ĐƠN HÀNG
+              </span>
+            </div>
+          </Col>
+        </Row >
         <Row gutter={[24, 0]}>
           <Col xs="24" xl={24}>
             <Card
               bordered={false}
               className="criclebox tablespace mb-24"
-              title="Authors Table"
-              extra={
-                <>
-                  <Radio.Group onChange={onChange} defaultValue="a">
-                    <Radio.Button value="a">All</Radio.Button>
-                    <Radio.Button value="b">ONLINE</Radio.Button>
-                  </Radio.Group>
-                </>
-              }
+              title="Danh sách chưa đặt hàng"
+              style={{ paddingLeft: 10 }}
             >
               <div className="table-responsive">
                 <Table
+                  rowClassName={(record) => {
+                    const date = moment(record.ngayDongBo);
+                    const today = moment();
+                    const diffInDays = date.diff(today, 'days');
+
+                    if (date.isBefore(today, 'day')) {
+                      return 'red-text';
+                    } else if (diffInDays >= 0 && diffInDays <= 10) {
+                      return 'yellow-text';
+                    }
+                    return '';
+                  }}
                   columns={columns}
                   dataSource={data}
                   pagination={false}
-                  className="ant-border-space"
+                  // className="ant-border-space"
+                  onRow={(record) => ({
+                    onClick: () => handleClick(record), // Thêm sự kiện click vào hàng
+                  })}
+                  scroll={{
+                    y: 55 * 13,
+                  }}
+                  style={{ userSelect: 'none', }}
                 />
               </div>
             </Card>
-
-            <Card
-              bordered={false}
-              className="criclebox tablespace mb-24"
-              title="Projects Table"
-              extra={
-                <>
-                  <Radio.Group onChange={onChange} defaultValue="all">
-                    <Radio.Button value="all">All</Radio.Button>
-                    <Radio.Button value="online">ONLINE</Radio.Button>
-                    <Radio.Button value="store">STORES</Radio.Button>
-                  </Radio.Group>
-                </>
-              }
+            <Modal
+              // title={`Mã vị trí kho: ${selectedMaViTriKho || 'N/A'}`}
+              visible={isModalVisible}
+              onCancel={handleModalClose}
+              onOk={handleModalClose}
+              width={"80%"}
             >
-              <div className="table-responsive">
+              <Card
+                className="criclebox tablespace "
+                title="Danh sách chi tiết vật tư"
+                style={{ padding: 10, marginTop: 20 }}
+              >
+                {/* <p>Phần trăm: {selectedKey} %</p> */}
                 <Table
-                  columns={project}
-                  dataSource={dataproject}
+                  columns={columnsDSVT}
+                  dataSource={danhSachVatTu}
                   pagination={false}
-                  className="ant-border-space"
+                  scroll={{
+                    y: 55 * 8,
+                  }}
+                  style={{ userSelect: 'none', }}
                 />
-              </div>
-              <div className="uploadfile pb-15 shadow-none">
-                <Upload {...formProps}>
-                  <Button
-                    type="dashed"
-                    className="ant-full-box"
-                    icon={<ToTopOutlined />}
-                  >
-                    Click to Upload
-                  </Button>
-                </Upload>
-              </div>
-            </Card>
+              </Card>
+            </Modal>
           </Col>
         </Row>
-      </div>
+      </div >
     </>
   );
 }

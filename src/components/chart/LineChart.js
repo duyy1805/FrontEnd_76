@@ -16,7 +16,8 @@ import { MinusOutlined } from "@ant-design/icons";
 import axios from 'axios';
 import lineChart from "./configs/lineChart";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import "../../assets/styles/Style.css"
+import apiConfig from '../../../src/apiConfig.json'
+// import "../../assets/styles/Style.css"
 
 function LineChart() {
 
@@ -87,15 +88,21 @@ function LineChart() {
     const fetchData = async () => {
       try {
         // Gửi yêu cầu GET tới API
-        const response = await axios.get('http://localhost:5000/api/kho', {
-          params: {
-            TenNha: "Kho N1", // Truyền tham số nếu cần
-            ID_Kho: 1,
-            MaVung: "A"
+        const response = await axios.post(
+          `${apiConfig.API_BASE_URL}/layoutkho/npl`,
+          {
+            tenNha: "Kho N1",
+            idKho: 1,
+            maVung: "A"
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
           }
-        });
-        const positions = response.data.map(item => item.MaViTriKho);
-        const percent = response.data.map(item => item.PhanTram);
+        );
+        const positions = response.data.map(item => item.maViTriKho);
+        const percent = response.data.map(item => item.phanTram);
         // Lưu dữ liệu vào state
         const formattedData = positions.map((position, index) => ({
           key: index + 1,
@@ -104,7 +111,7 @@ function LineChart() {
           value: position,
           percent: percent[index],
         }));
-
+        console.log(formattedData)
         setData(formattedData);
 
       } catch (error) {
@@ -142,7 +149,8 @@ function LineChart() {
       percent: percents.slice(j * 5, j * 5 + 5), // Lấy phần tương ứng từ percents
     }))
   );
-  console.log(groupedDataByRowTitle)
+
+  console.log(tableData)
   // Chia tableData thành các nhóm 3 hàng
   const groupedData = Array.from({ length: Math.ceil(tableData.length / 3) }, (_, i) =>
     tableData.slice(i * 3, i * 3 + 3)

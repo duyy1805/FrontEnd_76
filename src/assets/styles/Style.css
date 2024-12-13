@@ -1,23 +1,29 @@
-.ant-table-wrapper .ant-table {
+.Layout_Kho .ant-table-wrapper .ant-table {
     font-size: 8px;
     font-weight: bold;
     border-radius: 0;
 }
 
 /* Thêm border 1px cho toàn bộ bảng */
-.ant-table {
+.Layout_Kho .ant-table {
     border: 1px solid #000;
-
 }
 
 
-.ant-table-tbody>tr>td {
+.Layout_Kho .ant-table-tbody>tr>td {
     border: 1px solid #000;
-
 }
 
-.ant-table-thead>tr>th {
-    /* border: 1px solid #000; */
+.ant-table-bordered .ant-table-container {
+    border: 1px solid black;
+}
+
+.N1 .ant-table-thead>tr>th {
+    border: 1px solid #000;
+}
+
+.N1 .ant-table {
+    border: 0px solid #000;
 }
 
 .ant-table-wrapper .ant-table.ant-table-bordered>.ant-table-container {
@@ -46,6 +52,26 @@
     justify-content: center;
     /* Căn giữa theo chiều ngang */
     padding: 6px;
+    /* Padding cho nội dung */
+    box-sizing: border-box;
+    /* Đảm bảo padding không làm ảnh hưởng đến kích thước */
+}
+
+.N1 .yellow-background,
+.N1 .green-background,
+.N1 .red-background,
+.N1 .white-background {
+    width: 100%;
+    /* Chiếm hết chiều rộng ô */
+    height: 100%;
+    /* Chiếm hết chiều cao ô */
+    display: flex;
+    /* Sử dụng Flexbox để căn giữa */
+    align-items: center;
+    /* Căn giữa theo chiều dọc */
+    justify-content: center;
+    /* Căn giữa theo chiều ngang */
+    padding: 2px;
     /* Padding cho nội dung */
     box-sizing: border-box;
     /* Đảm bảo padding không làm ảnh hưởng đến kích thước */
@@ -96,6 +122,12 @@
     padding: 6px 0;
 }
 
+
+.N1 .ant-table .ant-table-cell {
+    padding: 1px 10px;
+    width: 100px;
+}
+
 @keyframes blink-glow {
     0% {
         outline: 2px solid blue;
@@ -134,43 +166,29 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* position: relative; */
-    /* height: 200px; */
-    /* Chiều cao toàn bộ layout */
-    /* width: 100%; */
-    /* Chiều dài mũi tên phủ toàn bộ chiều ngang */
-    /* background-color: #f4f4f4; */
-    /* Màu nền */
+
 }
 
 .container_ {
-    /* display: fle; */
-    /* align-items: center; */
     justify-content: center;
-    /* position: relative; */
-    /* height: 200px; */
-    /* Chiều cao toàn bộ layout */
-    /* width: 100%; */
-    /* Chiều dài mũi tên phủ toàn bộ chiều ngang */
-    /* background-color: #f4f4f4; */
-    /* Màu nền */
+
 }
 
 .arrow-body {
     width: 100px;
     /* Chiều dài thân mũi tên */
-    height: 20px;
+    height: 16px;
     /* Độ dày thân mũi tên */
-    background-color: #007bff;
+    background-color: yellow;
     /* Màu của mũi tên */
 }
 
 .arrow-body_ {
-    width: 20px;
+    width: 16px;
     /* Chiều dài thân mũi tên */
     height: 100px;
     /* Độ dày thân mũi tên */
-    background-color: #007bff;
+    background-color: yellow;
     /* Màu của mũi tên */
 }
 
@@ -180,7 +198,7 @@
     border-style: solid;
     border-width: 20px 0 20px 20px;
     /* Định hình tam giác */
-    border-color: transparent transparent transparent #007bff;
+    border-color: transparent transparent transparent yellow;
     /* Màu của đầu mũi tên */
 }
 
@@ -189,7 +207,7 @@
     height: 0;
     border-style: solid;
     border-width: 20px 20px 20px 20px;
-    border-color: transparent #007bff transparent transparent;
+    border-color: transparent yellow transparent transparent;
 
 }
 
@@ -198,7 +216,7 @@
     height: 0;
     border-style: solid;
     border-width: 20px 20px 20px 20px;
-    border-color: transparent transparent #007bff transparent;
+    border-color: transparent transparent yellow transparent;
 
 }
 
@@ -207,6 +225,88 @@
     height: 0;
     border-style: solid;
     border-width: 20px 20px 20px 20px;
-    border-color: #007bff transparent transparent transparent;
+    border-color: yellow transparent transparent transparent;
 
+}
+
+.criclebox .ant-card-body {
+    padding: 0;
+}
+
+.red-text {
+    color: red;
+    /* Đổi màu chữ thành đỏ */
+}
+
+.yellow-text {
+    color: #faad14;
+    /* Đổi màu chữ thành vàng */
+}
+
+.N1 .arrow-body {
+    width: 50px;
+    /* Chiều dài thân mũi tên */
+    height: 8px;
+    /* Độ dày thân mũi tên */
+    background-color: yellow;
+    /* Màu của mũi tên */
+}
+
+.N1 .arrow-body_ {
+    width: 8px;
+    /* Chiều dài thân mũi tên */
+    height: 50px;
+    /* Độ dày thân mũi tên */
+    background-color: yellow;
+    /* Màu của mũi tên */
+}
+
+.N1 .arrow-head-r {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 10px 0 10px 10px;
+    /* Định hình tam giác */
+    border-color: transparent transparent transparent yellow;
+    /* Màu của đầu mũi tên */
+}
+
+.N1 .arrow-head-l {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 10px 10px 10px 10px;
+    border-color: transparent yellow transparent transparent;
+
+}
+
+.N1 .arrow-head-u {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 10px 10px 10px 10px;
+    border-color: transparent transparent yellow transparent;
+
+}
+
+.N1 .arrow-head-d {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 10px 10px 10px 10px;
+    border-color: yellow transparent transparent transparent;
+
+}
+
+
+.ant-table-filter-dropdown {
+    width: 250px;
+    /* Đặt chiều rộng cố định */
+    min-height: 100px;
+    /* Đặt chiều cao tối thiểu */
+}
+
+.ant-table-filter-dropdown .ant-select {
+    width: 100%;
+    /* Đảm bảo dropdown select chiếm hết chiều rộng */
 }
