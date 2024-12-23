@@ -458,7 +458,7 @@ h4 {
   fill: #141414;
 }
 
-.layout-dashboard .header-control .btn-sign-in {
+.btn-sign-in {
   height: auto;
   padding: 0 7px;
   margin: 0;
@@ -466,7 +466,7 @@ h4 {
   color: #8c8c8c;
 }
 
-.layout-dashboard .header-control .btn-sign-in svg {
+.btn-sign-in svg {
   margin-right: 4px;
 }
 

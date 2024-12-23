@@ -1,18 +1,8 @@
-/*!
-  =========================================================
-  * Muse Ant Design Dashboard - v1.0.0
-  =========================================================
-  * Product Page: https://www.creative-tim.com/product/muse-ant-design-dashboard
-  * Copyright 2021 Creative Tim (https://www.creative-tim.com)
-  * Licensed under MIT (https://github.com/creativetimofficial/muse-ant-design-dashboard/blob/main/LICENSE.md)
-  * Coded by Creative Tim
-  =========================================================
-  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout, Row, Col } from "antd";
 import { HeartFilled } from "@ant-design/icons";
-
+import { Button, Popover, Avatar, Space } from 'antd';
 import Countdown from "react-countdown";
 
 const Completionist = () => <span>You are good to go!</span>;
@@ -38,6 +28,17 @@ const renderer = ({ hours, minutes, seconds, completed, restart }) => {
 function Footer() {
 
   const { Footer: AntFooter } = Layout;
+
+  const [visible, setVisible] = useState(false);
+  const handleLogout = () => {
+    setVisible(false); // Đóng Popover sau khi nhấn đăng xuất
+  };
+  const content = (
+    <div>
+      <p>Thông tin profile</p>
+      <p onClick={handleLogout} style={{ cursor: 'pointer', color: 'blue' }}>Đăng xuất</p>
+    </div>
+  );
   const [key, setKey] = useState(0);
   const keyRef = useRef(key);
 
@@ -61,6 +62,38 @@ function Footer() {
           date={Date.now() + 1000 * 60 * 30}
           renderer={(props) => renderer({ ...props, restart: handleRestart })}
         />
+      </div >
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 350,
+          zIndex: 1000,
+        }}
+      >
+        <Popover
+          content={content}
+          title="Profile"
+          trigger="click"
+          visible={visible}
+          onVisibleChange={(visible) => setVisible(visible)}
+        >
+          <Button
+            shape="circle"
+            size="large"
+            style={{ backgroundColor: 'transparent', border: 'none', padding: 0 }}
+          >
+            <img
+              src="https://i2.wp.com/genshinbuilds.aipurrjects.com/genshin/characters/raiden_shogun/image.png?strip=all&quality=100" // URL của ảnh
+              alt="Profile"
+              style={{
+                width: '32px', // Điều chỉnh kích thước ảnh
+                height: '32px', // Điều chỉnh kích thước ảnh
+                borderRadius: '50%', // Làm ảnh thành hình tròn
+              }}
+            />
+          </Button>
+        </Popover>
       </div >
     </AntFooter>
   );

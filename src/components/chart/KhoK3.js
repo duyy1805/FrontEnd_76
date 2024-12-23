@@ -504,6 +504,12 @@ const KhoK3 = (props) => {
 
   // Gọi API và xử lý dữ liệu
   useEffect(() => {
+    console.log("pathname", pathname)
+    if (pathname === "/KhoK3") {
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.documentElement.style.overflow = "auto"; // Hoặc giá trị mặc định
+    }
     const fetchData = async () => {
       try {
         const response = await callAPILayoutKho_BTP();
@@ -1194,7 +1200,7 @@ const KhoK3 = (props) => {
           right: 10,
           zIndex: 1000,
           cursor: "pointer",
-          fontSize: "24px",
+          fontSize: "18px",
           backgroundColor: "white",
           border: "1px solid #d9d9d9",
           borderRadius: "4px",
@@ -1256,7 +1262,9 @@ const KhoK3 = (props) => {
         <Col span={24} md={6}>
           <Breadcrumb>
             <Breadcrumb.Item>
-              Pages
+              <Link to="/">
+                Trang chủ
+              </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item style={{ textTransform: "capitalize", userSelect: 'none', }}>
               Kho kinh tế - quốc phòng
@@ -1398,7 +1406,7 @@ const KhoK3 = (props) => {
                 </div>
               </Card>
             </Col>
-            <Col xs={24} sm={24} md={12} lg={12} xl={19} className="mb-24">
+            <Col xs={24} sm={24} md={12} lg={12} xl={19} className="mb-24" >
               <div className="linechart" style={{ display: 'flex', justifyContent: 'center', userSelect: 'none', }}>
                 <div >
                   <Title level={3}>SƠ ĐỒ KHO KINH TẾ - QUỐC PHÒNG (K3)</Title>
@@ -1427,7 +1435,7 @@ const KhoK3 = (props) => {
                     }}
                   >
                     <TransformComponent >
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
                         <div style={{ display: 'flex' }}>
                           <div style={{
                             display: 'inline-block', transform: 'rotate(-180deg)',
@@ -1690,7 +1698,7 @@ const KhoK3 = (props) => {
       {
         !isDivVisible && (
           <Row gutter={[24, 0]}>
-            <Col xs={24} sm={24} md={12} lg={12} xl={20} className="mb-24">
+            <Col xs={24} sm={24} md={12} lg={12} xl={20} className="mb-24" >
               <div className="linechart" style={{ display: 'flex', justifyContent: 'center', marginTop: 0, userSelect: 'none', }}>
                 <div >
                   <Title level={1} >SƠ ĐỒ KHO KINH TẾ - QUỐC PHÒNG (K3)</Title>

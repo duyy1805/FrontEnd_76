@@ -78,7 +78,8 @@ function Tables() {
   const handleClick = async (record) => {
     const response = await callAPIDanhSachVatTu(record.idDonHang);
     console.log(response)
-    await setDanhSachVatTu(response.data)
+    const filteredData = response.data.filter(item => item.nhuCauVatTu !== 0);
+    await setDanhSachVatTu(filteredData)
     setIsModalVisible(true); // Hiển thị modal
   };
 
@@ -141,6 +142,14 @@ function Tables() {
     //   align: 'center',
     // },
     {
+      title: 'STT',
+      dataIndex: 'index',
+      key: 'index',
+      align: 'center',
+      width: '5%',
+      render: (text, record, index) => index + 1, // Hiển thị số thứ tự dựa trên index
+    },
+    {
       title: 'Mã Đơn Hàng',
       dataIndex: 'maDonHang',
       key: 'maDonHang',
@@ -190,6 +199,14 @@ function Tables() {
 
 
   const columnsDSVT = [
+    {
+      title: 'STT',
+      dataIndex: 'index',
+      key: 'index',
+      align: 'center',
+      width: '5%',
+      render: (text, record, index) => index + 1, // Hiển thị số thứ tự dựa trên index
+    },
     {
       title: 'Chủng Loại Vật Tư',
       dataIndex: 'tenChungLoaiVatTu',
@@ -265,30 +282,38 @@ function Tables() {
       <div className="tabled"
         style={{ padding: 10 }}
       >
-        <Row gutter={[24, 0]}
-          style={{
-            paddingLeft: 10,
-            paddingBottom: 10
-          }}>
-          <Col span={24} md={6}>
-            <Breadcrumb>
-              <Breadcrumb.Item>
-                Pages
-              </Breadcrumb.Item>
-              <Breadcrumb.Item style={{ textTransform: "capitalize" }}>
-                Đơn hàng
-              </Breadcrumb.Item>
-            </Breadcrumb>
-            <div className="ant-page-header-heading">
-              <span
-                className="ant-page-header-heading-title"
-                style={{ textTransform: "capitalize" }}
-              >
-                ĐƠN HÀNG
-              </span>
-            </div>
-          </Col>
-        </Row >
+        <Card
+          bordered={false}
+          className="criclebox tablespace mb-24"
+          style={{ padding: 10 }}
+        >
+          <Row gutter={[24, 0]}
+            style={{
+              paddingLeft: 10,
+              paddingBottom: 10
+            }}>
+            <Col span={24} md={6}>
+              <Breadcrumb>
+                <Breadcrumb.Item>
+                  <Link to="/">
+                    Trang chủ
+                  </Link>
+                </Breadcrumb.Item>
+                <Breadcrumb.Item style={{ textTransform: "capitalize" }}>
+                  Đơn hàng
+                </Breadcrumb.Item>
+              </Breadcrumb>
+              <div className="ant-page-header-heading">
+                <span
+                  className="ant-page-header-heading-title"
+                  style={{ textTransform: "capitalize" }}
+                >
+                  ĐƠN HÀNG
+                </span>
+              </div>
+            </Col>
+          </Row >
+        </Card>
         <Row gutter={[24, 0]}>
           <Col xs="24" xl={24}>
             <Card

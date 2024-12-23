@@ -18,7 +18,7 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 // import "../../assets/styles/Style.css"
 import ApexCharts from 'apexcharts'
 import apiConfig from '../../../src/apiConfig.json'
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useLocation } from "react-router-dom";
 
 //Gọi API layout kho
 const callAPILayoutKho_NPL = async () => {
@@ -86,7 +86,7 @@ const KhoN1 = (props) => {
     const [ngayChamLC, setNgayChamLC] = useState(179)
 
     // Hàm xử lý toggle
-
+    const { pathname } = useLocation();
 
     const buttonRefScreen = useRef(null);
 
@@ -426,6 +426,12 @@ const KhoN1 = (props) => {
 
     // Gọi API và xử lý dữ liệu
     useEffect(() => {
+        console.log("pathname", pathname)
+        if (pathname === "/KhoN1") {
+            document.documentElement.style.overflow = "hidden";
+        } else {
+            document.documentElement.style.overflow = "auto"; // Hoặc giá trị mặc định
+        }
         const fetchData = async () => {
             try {
                 const response = await callAPILayoutKho_NPL();
@@ -1044,7 +1050,9 @@ const KhoN1 = (props) => {
                 <Col span={24} md={6}>
                     <Breadcrumb>
                         <Breadcrumb.Item>
-                            Pages
+                            <Link to="/">
+                                Trang chủ
+                            </Link>
                         </Breadcrumb.Item>
                         <Breadcrumb.Item style={{ textTransform: "capitalize" }}>
                             Kho N1

@@ -310,3 +310,61 @@
     width: 100%;
     /* Đảm bảo dropdown select chiếm hết chiều rộng */
 }
+
+.education,
+.work {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #E8E8E8;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+.row {
+    width: 96%;
+    max-width: 1020px;
+    margin: 0 auto;
+    padding-top: 40px;
+}
+
+#resume h1 {
+    font: 18px / 24px 'opensans-bold', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+#resume h1 span {
+    border-bottom: 3px solid #0762f9;
+    padding-bottom: 6px;
+}
+
+.hover-container {
+    box-shadow: 0 4px 15px rgba(255, 73, 187, 0.2);
+    /* Bóng đổ mờ ban đầu */
+}
+
+.hover-container:hover {
+    transform: scale(1.1);
+    /* Phóng to khi hover */
+    box-shadow: 0 4px 15px rgba(255, 73, 187, 0.7);
+    /* Bóng đổ khi hover */
+}
+
+/* Chỉ áp dụng cho dropdown có class .custom-dropdown */
+.custom-dropdown {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Hiệu ứng hover và chọn item trong custom dropdown */
+.custom-dropdown .ant-dropdown-menu-item:hover {
+    background-color: #e6f7ff;
+    color: #1890ff;
+}
+
+.custom-dropdown .ant-dropdown-menu-item-active {
+    background-color: #bae7ff;
+    color: #096dd9;
+}
