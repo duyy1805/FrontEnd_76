@@ -4,6 +4,7 @@ import { Layout, Row, Col } from "antd";
 import { HeartFilled } from "@ant-design/icons";
 import { Button, Popover, Avatar, Space } from 'antd';
 import Countdown from "react-countdown";
+import { useHistory } from 'react-router-dom';
 
 const Completionist = () => <span>You are good to go!</span>;
 
@@ -28,14 +29,18 @@ const renderer = ({ hours, minutes, seconds, completed, restart }) => {
 function Footer() {
 
   const { Footer: AntFooter } = Layout;
-
   const [visible, setVisible] = useState(false);
+  const history = useHistory();
+
   const handleLogout = () => {
-    setVisible(false); // Đóng Popover sau khi nhấn đăng xuất
+    localStorage.removeItem('role');
+    localStorage.removeItem('accessToken');
+    setVisible(false);
+    history.push('/sign-in');
   };
   const content = (
     <div>
-      <p>Thông tin profile</p>
+      <p>{localStorage.getItem('role')}</p>
       <p onClick={handleLogout} style={{ cursor: 'pointer', color: 'blue' }}>Đăng xuất</p>
     </div>
   );
@@ -63,7 +68,7 @@ function Footer() {
           renderer={(props) => renderer({ ...props, restart: handleRestart })}
         />
       </div >
-      <div
+      {/* <div
         style={{
           position: "absolute",
           top: 10,
@@ -94,7 +99,7 @@ function Footer() {
             />
           </Button>
         </Popover>
-      </div >
+      </div > */}
     </AntFooter>
   );
 }

@@ -24,11 +24,12 @@ function App() {
       <Switch>
         <Route path="/sign-up" exact component={SignUp} />
         <Route path="/sign-in" exact component={SignIn} />
-        <PrivateRoute exact path="/" exact component={StartScreen} rolesAllowed={["admin"]} />
-        <PrivateRoute exact path="/DanhSachChuaDatHang" component={Tables} rolesAllowed={["admin"]} />
+        //private route
+        <Route exact path="/" exact component={StartScreen} rolesAllowed={["admin"]} />
+        <Route exact path="/DanhSachChuaDatHang" component={Tables} rolesAllowed={["admin"]} />
         <Main>
           {/* PrivateRoute bảo vệ các route dành cho admin */}
-          <PrivateRoute exact path="/Dashboard" component={Home} rolesAllowed={["admin"]} />
+          <Route exact path="/Dashboard" component={Home} rolesAllowed={["admin"]} />
 
           {/* Route dành cho user */}
           <Route exact path="/KhoK3" component={KhoK3} rolesAllowed={["admin", "user"]} />

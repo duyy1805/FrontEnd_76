@@ -284,8 +284,8 @@ function Tables() {
       >
         <Card
           bordered={false}
-          className="criclebox tablespace mb-24"
-          style={{ padding: 10 }}
+          className="criclebox tablespace"
+          style={{ padding: 10, marginBottom: 10 }}
         >
           <Row gutter={[24, 0]}
             style={{

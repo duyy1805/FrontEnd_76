@@ -226,12 +226,12 @@ const KhoN1 = (props) => {
             key: 'ton',
             align: 'center',
         },
-        {
-            title: 'Tuổi tồn',
-            dataIndex: 'tuoiTon',
-            key: '',
-            align: 'center',
-        },
+        // {
+        //     title: 'Tuổi tồn',
+        //     dataIndex: 'tuoiTon',
+        //     key: '',
+        //     align: 'center',
+        // },
     ];
 
     const updateHeight = () => {
@@ -334,6 +334,32 @@ const KhoN1 = (props) => {
         setListData(data)
     }
 
+    const filterLocationsByMaVatTu = (maVatTu) => {
+        return data
+            .filter(item =>
+                item.chiTiets.some(detail => detail.maVatTu === maVatTu)
+            )
+        // .map(item => item.maViTriKho);
+    };
+
+    // Xử lý sự kiện khi nhấn Submit
+    const handleSubmit_ = () => {
+        const filteredResults = filterLocationsByMaVatTu(inputMaVatTu);
+        console.log(filteredResults);
+
+        const x = data
+            .map((record) =>
+                record.chiTiets
+                    .filter((item) => item.maVatTu === inputMaVatTu)
+                    .map((item) => item.tongTon)
+            )
+            .flat();
+        console.log(x[0]);
+        setViTri(filteredResults);
+        setTongTon(x[0]);
+        setListData(filteredResults);
+    };
+
     const handleSubmit = async () => {
         try {
             const response = await callAPISearch_();
@@ -426,7 +452,6 @@ const KhoN1 = (props) => {
 
     // Gọi API và xử lý dữ liệu
     useEffect(() => {
-        console.log("pathname", pathname)
         if (pathname === "/KhoN1") {
             document.documentElement.style.overflow = "hidden";
         } else {
@@ -463,32 +488,32 @@ const KhoN1 = (props) => {
                 // Tạo bản đồ tổng tồn
                 filteredData.forEach(viTri => {
                     viTri.chiTiets.forEach(chiTiet => {
-                        const key = `${chiTiet.maVatTu}-${chiTiet.tuoiTon}`;
+                        const key = `${chiTiet.maVatTu}-${chiTiet.quyCach}`;
                         tonMap[key] = (tonMap[key] || 0) + chiTiet.ton;
                     });
                 });
 
                 filteredData.forEach(viTri => {
                     viTri.chiTiets.forEach(chiTiet => {
-                        const key = `${chiTiet.maVatTu}-${chiTiet.tuoiTon}`;
+                        const key = `${chiTiet.maVatTu}-${chiTiet.quyCach}`;
                         chiTiet.tongTon = tonMap[key];
                     });
                 });
 
                 filteredData.forEach(viTri => {
                     viTri.chiTiets.forEach(chiTiet => {
-                        const key = `${chiTiet.maVatTu}-${chiTiet.maDonHang}-${chiTiet.tuoiTon}`;
+                        const key = `${chiTiet.maVatTu}-${chiTiet.maDonHang}-${chiTiet.quyCach}`;
                         tonMap1[key] = (tonMap1[key] || 0) + chiTiet.ton;
                     });
                 });
 
                 filteredData.forEach(viTri => {
                     viTri.chiTiets.forEach(chiTiet => {
-                        const key = `${chiTiet.maVatTu}-${chiTiet.maDonHang}-${chiTiet.tuoiTon}`;
+                        const key = `${chiTiet.maVatTu}-${chiTiet.maDonHang}-${chiTiet.quyCach}`;
                         chiTiet.tongTonTheoMDH = tonMap1[key];
                     });
                 });
-                console.log(filteredData)
+                console.log("data", filteredData)
                 setData(filteredData);
                 setListData(filteredData);
             } catch (error) {
@@ -901,7 +926,6 @@ const KhoN1 = (props) => {
 
 
     const result_A = groupData(data, 4, 'A');
-    console.log(result_A)
     const result_B = groupData(data, 4, 'B');
 
     //========================================
@@ -1024,7 +1048,7 @@ const KhoN1 = (props) => {
                     right: 10,
                     zIndex: 1000,
                     cursor: "pointer",
-                    fontSize: "24px",
+                    fontSize: "18px",
                     backgroundColor: "white",
                     border: "1px solid #d9d9d9",
                     borderRadius: "4px",
@@ -1075,14 +1099,14 @@ const KhoN1 = (props) => {
                         sm={24}
                         md={12}
                         lg={12}
-                        xl={12}
+                        xl={8}
                         className="mb-24"
                     >
                         <Card bordered={false} className=" "
                             style={{ marginBottom: -25 }}
                         >
                             <Row align="middle" justify="space-around" gutter={[24, 0]}>
-                                <Col xs={8}>
+                                {/* <Col xs={8}>
                                     <Input
                                         type="text"
                                         placeholder="Lệnh xuất BTP"
@@ -1091,11 +1115,11 @@ const KhoN1 = (props) => {
                                         prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
                                         style={{ borderRadius: '6px' }}
                                     />
-                                </Col>
-                                <Col xs={8}>
+                                </Col> */}
+                                <Col xs={12}>
                                     <Input
                                         type="text"
-                                        placeholder="ItemCode"
+                                        placeholder="Mã vật tư"
                                         value={inputMaVatTu}
                                         onChange={handleInputMaVatTuChange}
                                         prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
@@ -1103,7 +1127,7 @@ const KhoN1 = (props) => {
                                     />
                                 </Col>
                                 <Col xs={3}>
-                                    <Button type="primary" onClick={handleSubmit} >
+                                    <Button type="primary" onClick={handleSubmit_} >
                                         Search
                                     </Button>
                                 </Col>
@@ -1150,7 +1174,7 @@ const KhoN1 = (props) => {
                 />
               </Card>
             </Col> */}
-                        <Col xs={24} sm={24} md={12} lg={12} xl={8} className="mb-24" style={{ marginTop: 12, marginBottom: 12 }}>
+                        {/* <Col xs={24} sm={24} md={12} lg={12} xl={8} className="mb-24" style={{ marginTop: 12, marginBottom: 12 }}>
                             <Card bordered={false} className="criclebox h-full" style={{ height: 160, width: 510, backgroundColor: '#c8c8c8', display: "flex" }}>
                                 <div style={{ display: "flex" }}>
 
@@ -1192,7 +1216,7 @@ const KhoN1 = (props) => {
                                     />
                                 </div>
                             </Card>
-                        </Col>
+                        </Col> */}
                         <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
                             <div className="linechart" style={{ display: 'flex', justifyContent: 'center' }}>
                                 <div >
@@ -1200,7 +1224,7 @@ const KhoN1 = (props) => {
                                 </div>
                             </div>
                             <Card bordered={false} className="criclebox h-full" style={{
-                                display: 'flex', justifyContent: 'center', width: "100%"
+                                display: 'flex', justifyContent: 'center', width: "100%", overflow: 'hidden',
                             }}>
 
                                 <div className="Layout_Kho N1" style={{ flexGrow: 1, marginTop: 10, marginBottom: -10 }}>

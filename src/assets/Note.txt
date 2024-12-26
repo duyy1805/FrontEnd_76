@@ -1,0 +1,8 @@
+1. quy hoạch theo vị trí (khu vực để tent, bag, backpack, khác)
+2. Layout cột I,J ngược ====Done===
+3. Tách 2 khu cực chạy RFID và đóng cont ===Done===
+4. Tách các dãy thành 2 phần riêng với đường đi ở giữa ===Done===
+5. Kho có tổng bao nhiêu khối
+6. Tính toán tỷ lệ đầy kho theo số khối. biểu đồ theo số khổi đầy, trống
+7. Hàng MTO, MTS. Lưu kho theo order, stock
+8. TÌm kiếm theo CC code và Model code

@@ -997,13 +997,29 @@ const KhoK3 = (props) => {
 
   // Sử dụng
   const result_A = createResult(data_A, 'A');
+  const result_A_1 = result_A.slice(0, 20);
+  const result_A_2 = result_A.slice(20, 40);
   const result_B = createResult(data_B, 'B');
+  const result_B_1 = result_B.slice(0, 20);
+  const result_B_2 = result_B.slice(20, 40);
   const result_C = createResult(data_C, 'C');
+  const result_C_1 = result_C.slice(0, 20);
+  const result_C_2 = result_C.slice(20, 40);
   const result_D = createResult(data_D, 'D');
+  const result_D_1 = result_D.slice(0, 20);
+  const result_D_2 = result_D.slice(20, 40);
   const result_E = createResult(data_E, 'E');
+  const result_E_1 = result_E.slice(0, 20);
+  const result_E_2 = result_E.slice(20, 40);
   const result_F = createResult(data_F, 'F');
+  const result_F_1 = result_F.slice(0, 20);
+  const result_F_2 = result_F.slice(20, 40);
   const result_G = createResult(data_G, 'G');
+  const result_G_1 = result_G.slice(0, 20);
+  const result_G_2 = result_G.slice(20, 40);
   const result_H = createResult(data_H, 'H');
+  const result_H_1 = result_H.slice(0, 20);
+  const result_H_2 = result_H.slice(20, 40);
   const result_I = createResult(data_I, 'I');
   const result_J = createResult(data_J, 'J');
   console.log(result_A)
@@ -1363,6 +1379,7 @@ const KhoK3 = (props) => {
                 />
               </Card>
             </Col> */}
+
             <Col xs={24} sm={24} md={12} lg={12} xl={8} className="mb-24" style={{ marginTop: 12, marginBottom: 12 }}>
               <Card bordered={false} className="criclebox h-full" style={{ height: 160, width: 510, backgroundColor: '#c8c8c8', display: "flex" }}>
                 <div style={{ display: "flex" }}>
@@ -1407,7 +1424,7 @@ const KhoK3 = (props) => {
               </Card>
             </Col>
             <Col xs={24} sm={24} md={12} lg={12} xl={19} className="mb-24" >
-              <div className="linechart" style={{ display: 'flex', justifyContent: 'center', userSelect: 'none', }}>
+              <div className="linechart" style={{ display: 'flex', justifyContent: 'center', userSelect: 'none', marginTop: -10 }}>
                 <div >
                   <Title level={3}>SƠ ĐỒ KHO KINH TẾ - QUỐC PHÒNG (K3)</Title>
                 </div>
@@ -1417,7 +1434,7 @@ const KhoK3 = (props) => {
                 transform: `scale(${100 / scale}%) `,
                 // transformOrigin: 'top center',
                 transformOrigin: 'top left',
-                width: `${120 * scale}%`, overflow: 'hidden',
+                width: `${125 * scale}%`, overflow: 'hidden',
                 display: 'flex', justifyContent: 'center'
               }}>
 
@@ -1438,7 +1455,8 @@ const KhoK3 = (props) => {
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
                         <div style={{ display: 'flex' }}>
                           <div style={{
-                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            display: 'inline-block',
+                            transform: 'rotate(-180deg)',
                             marginRight: 30
                           }}
                             ref={tableRef}>
@@ -1451,7 +1469,6 @@ const KhoK3 = (props) => {
                               scroll={{
                                 x: 'max-content',
                               }}
-
                             />
                           </div>
                           <div style={{
@@ -1546,7 +1563,9 @@ const KhoK3 = (props) => {
                             />
                           </div>
                           <div style={{
-                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            display: 'flex',
+                            alignItems: 'end',
+                            transform: 'rotate(-180deg)',
                             marginRight: 30
                           }}
                             ref={tableRef}>
@@ -1559,7 +1578,9 @@ const KhoK3 = (props) => {
                             />
                           </div>
                           <div style={{
-                            display: 'inline-block', transform: 'rotate(-180deg)',
+                            display: 'flex',
+                            alignItems: 'end',
+                            transform: 'rotate(-180deg)',
                             marginRight: 30
                           }}
                             ref={tableRef}>
@@ -1699,7 +1720,7 @@ const KhoK3 = (props) => {
         !isDivVisible && (
           <Row gutter={[24, 0]}>
             <Col xs={24} sm={24} md={12} lg={12} xl={20} className="mb-24" >
-              <div className="linechart" style={{ display: 'flex', justifyContent: 'center', marginTop: 0, userSelect: 'none', }}>
+              <div className="linechart" style={{ display: 'flex', justifyContent: 'center', marginTop: -10, userSelect: 'none', }}>
                 <div >
                   <Title level={1} >SƠ ĐỒ KHO KINH TẾ - QUỐC PHÒNG (K3)</Title>
                 </div>
@@ -1708,10 +1729,10 @@ const KhoK3 = (props) => {
 
                 marginLeft: -270,
                 marginTop: 0,
-                transform: `scale(${129 / scale}%) `, //110
+                transform: `scale(${129 / scale}%) `,
                 // transformOrigin: 'top center',
                 transformOrigin: 'top left',
-                width: `${110 * scale}%`, overflow: 'hidden' //130
+                width: `${110 * scale}%`, overflow: 'hidden',
               }}>
                 {/* <div style={{ display: 'flex' }}>
                   <div className="container" style={{ marginLeft: 600 }}>
@@ -1727,7 +1748,7 @@ const KhoK3 = (props) => {
                     <div className="arrow-head-r"></div>
                   </div>
                 </div> */}
-                <div className="Layout_Kho" style={{ width: '100%', flexGrow: 1, marginTop: 0 }}>
+                <div className="Layout_Kho" style={{ width: '100%', flexGrow: 1, marginTop: 10, marginLeft: 120 }}>
                   <TransformWrapper
                     wheel={{
                       step: 0.1, // Tốc độ zoom
@@ -1849,7 +1870,7 @@ const KhoK3 = (props) => {
                           justifyContent: "center",
                           // alignItems: "center",
                           position: "absolute",
-                          top: 1810,
+                          top: 1850,
                           left: 1200
                         }}>
                           <div style={{ marginTop: 0, background: 'red', height: 50 }}>
@@ -1896,7 +1917,7 @@ const KhoK3 = (props) => {
                           justifyContent: "center",
                           // alignItems: "center",
                           position: "absolute",
-                          top: 1810,
+                          top: 1850,
                           left: 2800
                         }}>
                           <div style={{ marginTop: 0, background: 'red', height: 50 }}>
@@ -2184,34 +2205,64 @@ const KhoK3 = (props) => {
                             </div>
                             <div style={{
                               display: 'inline-block', transform: 'rotate(-180deg)',
-                              background: '#FFFFFF'
+                              background: 'red'
                             }}
                               ref={tableRef}>
                               <Table
                                 columns={columns_A}
                                 bordered
-                                dataSource={result_A}
+                                dataSource={result_A_1}
                                 pagination={false}
                                 rowKey="key"
                                 scroll={{
                                   x: 'max-content',
                                 }}
-
+                              />
+                              <Table
+                                columns={columns_A}
+                                bordered
+                                dataSource={result_A_2}
+                                pagination={false}
+                                showHeader={false}
+                                rowKey="key"
+                                scroll={{
+                                  x: 'max-content',
+                                }}
+                                style={{ marginTop: 40 }}
                               />
                             </div>
                             <div
                               style={{
                                 display: 'inline-block', transform: 'rotate(-180deg)',
-                                paddingLeft: 10, background: '#FFFFFF'
+                                background: 'red'
                               }}
                               ref={tableRef}>
                               <Table
                                 columns={columns_B}
                                 bordered
-                                dataSource={result_B}
+                                dataSource={result_B_1}
                                 pagination={false}
                                 rowKey="key"
                               />
+                              <div className="container" style={{ background: "red", width: "100%", justifyContent: 'space-around' }}>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <div className="arrow-head-l"></div>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <div className="arrow-body"></div>
+                                  </div>
+                                </div>
+                              </div>
+                              <Table
+                                columns={columns_B}
+                                bordered
+                                dataSource={result_B_2}
+                                pagination={false}
+                                showHeader={false}
+                                rowKey="key"
+                              />
+
                             </div>
                             <div className="container_" >
                               <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
@@ -2243,212 +2294,38 @@ const KhoK3 = (props) => {
                             </div>
                             <div style={{
                               display: 'inline-block', transform: 'rotate(-180deg)',
-                              paddingRight: 10, background: '#FFFFFF'
+                              background: 'red'
                             }}
                               ref={tableRef}>
                               <Table
                                 columns={columns_C}
                                 bordered
-                                dataSource={result_C}
+                                dataSource={result_C_1}
                                 pagination={false}
                                 rowKey="key"
+                              />
+                              <Table
+                                columns={columns_C}
+                                bordered
+                                dataSource={result_C_2}
+                                pagination={false}
+                                showHeader={false}
+                                rowKey="key"
+                                style={{ marginTop: 40 }}
                               />
                             </div>
                             <div style={{
                               display: 'inline-block', transform: 'rotate(-180deg)',
-                              paddingLeft: 10, background: '#FFFFFF'
+                              background: 'red'
                             }}
                               ref={tableRef}>
                               <Table
                                 columns={columns_D}
                                 bordered
-                                dataSource={result_D}
+                                dataSource={result_D_1}
                                 pagination={false}
                                 rowKey="key"
                               />
-                            </div>
-                            <div className="container_" >
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-head-d"></div>
-                              </div>
-                              {/*  */}
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
-                                <div className="arrow-head-u"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-head-d"></div>
-                              </div>
-                              {/*  */}
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
-                                <div className="arrow-head-u"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                            </div>
-                            <div style={{
-                              display: 'inline-block', transform: 'rotate(-180deg)',
-                              paddingRight: 10, background: '#FFFFFF'
-                            }}
-                              ref={tableRef}>
-                              <Table
-                                columns={columns_E}
-                                bordered
-                                dataSource={result_E}
-                                pagination={false}
-                                rowKey="key"
-                              />
-                            </div>
-                            <div style={{
-                              display: 'inline-block', transform: 'rotate(-180deg)',
-                              paddingLeft: 10, background: '#FFFFFF'
-                            }}
-                              ref={tableRef}>
-                              <Table
-                                columns={columns_F}
-                                bordered
-                                dataSource={result_F}
-                                pagination={false}
-                                rowKey="key"
-                              />
-                            </div>
-                            <div className="container_" >
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-head-d"></div>
-                              </div>
-                              {/*  */}
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
-                                <div className="arrow-head-u"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-head-d"></div>
-                              </div>
-                              {/*  */}
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
-                                <div className="arrow-head-u"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                            </div>
-                            <div style={{
-                              display: 'inline-block', transform: 'rotate(-180deg)',
-                              paddingRight: 10, background: '#FFFFFF'
-                            }}
-                              ref={tableRef}>
-                              <Table
-                                columns={columns_G}
-                                bordered
-                                dataSource={result_G}
-                                pagination={false}
-                                rowKey="key"
-                              />
-                            </div>
-                            <div style={{
-                              display: 'inline-block', transform: 'rotate(-180deg)',
-                              paddingLeft: 10, background: '#FFFFFF'
-                            }}
-                              ref={tableRef}>
-                              <Table
-                                columns={columns_H}
-                                bordered
-                                dataSource={result_H}
-                                pagination={false}
-                                rowKey="key"
-                              />
-                            </div>
-                            <div className="container_" >
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-head-d"></div>
-                              </div>
-                              {/*  */}
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
-                                <div className="arrow-head-u"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-head-d"></div>
-                              </div>
-                              {/*  */}
-                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
-                                <div className="arrow-head-u"></div>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <div className="arrow-body_"></div>
-                              </div>
-                            </div>
-                            <div>
-                              <Card
-                                style={{
-                                  height: 600,
-                                  width: 700,
-                                  marginBottom: 150,
-                                  display: "flex", // Sử dụng flexbox để căn giữa
-                                  justifyContent: "center", // Căn giữa ngang
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    height: 550,
-                                    width: 600,
-                                    marginBottom: 150,
-                                    backgroundColor: "green",
-                                    padding: "20px 80px 20px 80px"
-                                  }}
-                                >
-                                  <h1
-                                    style={{
-                                      fontSize: "36px", // Kích thước chữ
-                                      fontWeight: "bold", // Chữ đậm
-                                      margin: 0, // Loại bỏ margin mặc định
-                                      textAlign: "center", // Căn giữa văn bản
-                                      background: '#ffffff',
-                                      color: "#000000",
-                                    }}
-                                  >
-                                    KHU VỰC CHẠY <br />MÁY RFID
-                                  </h1>
-                                  <h1
-                                    style={{
-                                      paddingTop: 240,
-                                      fontSize: "36px", // Kích thước chữ
-                                      fontWeight: "bold", // Chữ đậm
-                                      margin: 0, // Loại bỏ margin mặc định
-                                      textAlign: "center", // Căn giữa văn bản
-                                      backgroundColor: "green",
-                                      color: "#ffffff",
-                                    }}
-                                  >
-                                    KHU VỰC TẬP KẾT <br />HÀNG ĐÓNG CONT
-                                  </h1>
-                                </div>
-                              </Card>
                               <div className="container" style={{ background: "red", width: "100%", justifyContent: 'space-around' }}>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -2458,8 +2335,208 @@ const KhoK3 = (props) => {
                                     <div className="arrow-head-r"></div>
                                   </div>
                                 </div>
-                                {/*  */}
                               </div>
+                              <Table
+                                columns={columns_D}
+                                bordered
+                                dataSource={result_D_2}
+                                pagination={false}
+                                showHeader={false}
+                                rowKey="key"
+                              />
+                            </div>
+                            <div className="container_" >
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-head-d"></div>
+                              </div>
+                              {/*  */}
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
+                                <div className="arrow-head-u"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-head-d"></div>
+                              </div>
+                              {/*  */}
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
+                                <div className="arrow-head-u"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                            </div>
+                            <div style={{
+                              display: 'inline-block', transform: 'rotate(-180deg)',
+                              background: 'red'
+                            }}
+                              ref={tableRef}>
+                              <Table
+                                columns={columns_E}
+                                bordered
+                                dataSource={result_E_1}
+                                pagination={false}
+                                rowKey="key"
+                              />
+                              <Table
+                                columns={columns_E}
+                                bordered
+                                dataSource={result_E_2}
+                                pagination={false}
+                                showHeader={false}
+                                rowKey="key"
+                                style={{ marginTop: 40 }}
+                              />
+                            </div>
+                            <div style={{
+                              display: 'inline-block', transform: 'rotate(-180deg)',
+                              background: 'red'
+                            }}
+                              ref={tableRef}>
+                              <Table
+                                columns={columns_F}
+                                bordered
+                                dataSource={result_F_1}
+                                pagination={false}
+                                rowKey="key"
+                              />
+                              <div className="container" style={{ background: "red", width: "100%", justifyContent: 'space-around' }}>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <div className="arrow-head-l"></div>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <div className="arrow-body"></div>
+                                  </div>
+                                </div>
+                              </div>
+                              <Table
+                                columns={columns_F}
+                                bordered
+                                dataSource={result_F_2}
+                                pagination={false}
+                                showHeader={false}
+                                rowKey="key"
+                              />
+                            </div>
+                            <div className="container_" >
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-head-d"></div>
+                              </div>
+                              {/*  */}
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
+                                <div className="arrow-head-u"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-head-d"></div>
+                              </div>
+                              {/*  */}
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
+                                <div className="arrow-head-u"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                            </div>
+                            <div style={{
+                              display: 'inline-block', transform: 'rotate(-180deg)',
+                              background: 'red'
+                            }}
+                              ref={tableRef}>
+                              <Table
+                                columns={columns_G}
+                                bordered
+                                dataSource={result_G_1}
+                                pagination={false}
+                                rowKey="key"
+                              />
+                              <Table
+                                columns={columns_G}
+                                bordered
+                                dataSource={result_G_2}
+                                pagination={false}
+                                showHeader={false}
+                                rowKey="key"
+                                style={{ marginTop: 40 }}
+                              />
+                            </div>
+                            <div style={{
+                              display: 'inline-block', transform: 'rotate(-180deg)',
+                              background: 'red'
+                            }}
+                              ref={tableRef}>
+                              <Table
+                                columns={columns_H}
+                                bordered
+                                dataSource={result_H_1}
+                                pagination={false}
+                                rowKey="key"
+                              />
+                              <div className="container" style={{ background: "red", width: "100%", justifyContent: 'space-around' }}>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <div className="arrow-body"></div>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <div className="arrow-head-r"></div>
+                                  </div>
+                                </div>
+                              </div>
+                              <Table
+                                columns={columns_H}
+                                bordered
+                                dataSource={result_H_2}
+                                pagination={false}
+                                showHeader={false}
+                                rowKey="key"
+                              />
+                            </div>
+                            <div className="container_" >
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-head-d"></div>
+                              </div>
+                              {/*  */}
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
+                                <div className="arrow-head-u"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-head-d"></div>
+                              </div>
+                              {/*  */}
+                              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 350 }}>
+                                <div className="arrow-head-u"></div>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="arrow-body_"></div>
+                              </div>
+                            </div>
+
+                            <div>
                               <div style={{
                                 display: 'inline-block', transform: 'rotate(-180deg)',
                                 paddingRight: 10, background: '#FFFFFF'
@@ -2487,6 +2564,62 @@ const KhoK3 = (props) => {
                                   rowKey="key"
                                 />
                               </div>
+                              <div className="container" style={{ background: "red", width: "100%", justifyContent: 'space-around' }}>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <div className="arrow-body"></div>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    <div className="arrow-head-r"></div>
+                                  </div>
+                                </div>
+                              </div>
+                              <Card
+                                style={{
+                                  height: 200,
+                                  width: 700,
+                                  marginTop: 110,
+                                  display: "flex", // Sử dụng flexbox để căn giữa
+                                  justifyContent: "center", // Căn giữa ngang
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    height: 180,
+                                    width: 600,
+                                    // marginBottom: 150,
+                                    backgroundColor: "green",
+                                    padding: "20px 80px 20px 80px"
+                                  }}
+                                >
+                                  <h1
+                                    style={{
+                                      fontSize: "36px", // Kích thước chữ
+                                      fontWeight: "bold", // Chữ đậm
+                                      margin: 0, // Loại bỏ margin mặc định
+                                      textAlign: "center", // Căn giữa văn bản
+                                      background: '#ffffff',
+                                      color: "#000000",
+                                    }}
+                                  >
+                                    KHU VỰC CHẠY <br />MÁY RFID
+                                  </h1>
+                                </div>
+                                <h1
+                                  style={{
+                                    paddingTop: 150,
+                                    paddingBottom: 150,
+                                    fontSize: "36px", // Kích thước chữ
+                                    fontWeight: "bold", // Chữ đậm
+                                    marginTop: 40, // Loại bỏ margin mặc định
+                                    textAlign: "center", // Căn giữa văn bản
+                                    backgroundColor: "green",
+                                    color: "#ffffff",
+                                  }}
+                                >
+                                  KHU VỰC TẬP KẾT <br />HÀNG ĐÓNG CONT
+                                </h1>
+                              </Card>
                             </div>
                             <div className="container_" >
                               <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
