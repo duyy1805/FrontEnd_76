@@ -473,7 +473,7 @@ const KhoN1 = (props) => {
                     }
 
                     // Điều kiện lọc
-                    return lastDigit < 5 && digitsAfterA < 9;
+                    return lastDigit < 6 && digitsAfterA < 9;
                 });
                 const sortedData = filteredData.sort((a, b) => {
                     // Lấy phần số sau chữ cái đầu tiên
@@ -872,7 +872,7 @@ const KhoN1 = (props) => {
 
         return groupedData[`${prefix}1`]?.map((item, index) => {
             const entry = {};
-            for (let i = 1; i <= 4; i++) {
+            for (let i = 1; i <= 5; i++) {
                 const key = `${prefix}${i}`;
                 entry[key] = groupedData[key]
                     ? {
@@ -925,13 +925,13 @@ const KhoN1 = (props) => {
     };
 
 
-    const result_A = groupData(data, 4, 'A');
-    const result_B = groupData(data, 4, 'B');
+    const result_A = groupData(data, 5, 'A');
+    const result_B = groupData(data, 5, 'B');
 
     //========================================
 
     const generateColumn = (keyPrefix) => {
-        const columns = Array.from({ length: 4 }, (_, index) => {
+        const columns = Array.from({ length: 5 }, (_, index) => {
             const key = `${keyPrefix}${index}`;
             return {
                 dataIndex: ['values', index],

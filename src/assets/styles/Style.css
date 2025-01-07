@@ -10,11 +10,18 @@
 }
 
 
-.Layout_Kho .ant-table-tbody>tr>td {
+/* .Layout_Kho .ant-table-tbody>tr>td {
     border: 1px solid #000;
 }
 
 .ant-table-bordered .ant-table-container {
+    border: 1px solid black;
+} */
+.N1 .ant-table-tbody>tr>td {
+    border: 1px solid #000;
+}
+
+.N1 .ant-table-bordered .ant-table-container {
     border: 1px solid black;
 }
 
@@ -51,7 +58,7 @@
     /* Căn giữa theo chiều dọc */
     justify-content: center;
     /* Căn giữa theo chiều ngang */
-    padding: 6px;
+    padding: 1.4px 2px;
     /* Padding cho nội dung */
     box-sizing: border-box;
     /* Đảm bảo padding không làm ảnh hưởng đến kích thước */
@@ -119,7 +126,7 @@
 }
 
 .Layout_Kho .ant-table .ant-table-cell {
-    padding: 6px 0;
+    padding: 2.5px 0;
 }
 
 
@@ -130,26 +137,30 @@
 
 @keyframes blink-glow {
     0% {
-        outline: 2px solid blue;
+        outline: 1px solid blue;
         /* box-shadow: 0 0 5px blue; */
     }
 
     50% {
-        outline: 2px solid rgba(0, 0, 255, 0.5);
+        outline: 1px solid rgba(0, 0, 255, 0.5);
         box-shadow: 0 0 15px rgba(0, 0, 255, 0.5);
     }
 
     100% {
-        outline: 2px solid blue;
+        outline: 1px solid blue;
         /* box-shadow: 0 0 5px blue; */
     }
 }
 
 .blink-glow {
     /* animation: blink-glow 1s ease-in-out infinite; */
-    outline: 2px solid blue;
+    outline: 1px solid blue;
 }
 
+.N1 .blink-glow {
+    /* animation: blink-glow 1s ease-in-out infinite; */
+    outline: 2px solid blue;
+}
 
 .ant-modal .ant-table {
     border: 0px;
@@ -175,18 +186,18 @@
 }
 
 .arrow-body {
-    width: 100px;
+    width: 25px;
     /* Chiều dài thân mũi tên */
-    height: 16px;
+    height: 4px;
     /* Độ dày thân mũi tên */
     background-color: yellow;
     /* Màu của mũi tên */
 }
 
 .arrow-body_ {
-    width: 16px;
+    width: 4px;
     /* Chiều dài thân mũi tên */
-    height: 100px;
+    height: 25px;
     /* Độ dày thân mũi tên */
     background-color: yellow;
     /* Màu của mũi tên */
@@ -196,7 +207,7 @@
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 20px 0 20px 20px;
+    border-width: 5px 0 5px 5px;
     /* Định hình tam giác */
     border-color: transparent transparent transparent yellow;
     /* Màu của đầu mũi tên */
@@ -206,7 +217,7 @@
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 20px 20px 20px 20px;
+    border-width: 5px 5px 5px 5px;
     border-color: transparent yellow transparent transparent;
 
 }
@@ -215,7 +226,7 @@
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 20px 20px 20px 20px;
+    border-width: 5px 5px 5px 5px;
     border-color: transparent transparent yellow transparent;
 
 }
@@ -224,7 +235,7 @@
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 20px 20px 20px 20px;
+    border-width: 5px 5px 5px 5px;
     border-color: yellow transparent transparent transparent;
 
 }
@@ -367,4 +378,73 @@
 .custom-dropdown .ant-dropdown-menu-item-active {
     background-color: #bae7ff;
     color: #096dd9;
+}
+
+.search_by .ant-card-body {
+    padding: 8px;
+}
+
+
+
+.map-container {
+    position: relative;
+    background-color: #f0f2f5;
+    /* Nền giả lập bản đồ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Chấm xanh biểu thị vị trí */
+.position-dot {
+    position: relative;
+    width: 12px;
+    height: 12px;
+    background-color: #00aaff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00aaff;
+    /* Tỏa sáng nhẹ xung quanh */
+}
+
+/* Các vòng tròn lan tỏa */
+.ripple {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #00aaff;
+    /* Viền vòng tròn */
+    border-radius: 50%;
+    animation: ripple-effect 2s infinite;
+    /* Hiệu ứng lặp lại */
+    opacity: 0;
+}
+
+/* Tạo từng vòng tròn với độ trễ */
+.ripple:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.ripple:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.ripple:nth-child(3) {
+    animation-delay: 1s;
+}
+
+/* Hiệu ứng vòng tròn lan tỏa */
+@keyframes ripple-effect {
+    0% {
+        transform: scale(0.5);
+        /* Bắt đầu nhỏ hơn chấm xanh */
+        opacity: 0.8;
+        /* Hiện rõ */
+    }
+
+    100% {
+        transform: scale(3);
+        /* Tỏa rộng */
+        opacity: 0;
+        /* Mờ dần */
+    }
 }

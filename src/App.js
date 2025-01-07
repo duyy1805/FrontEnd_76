@@ -25,6 +25,7 @@ function App() {
         <Route path="/sign-up" exact component={SignUp} />
         <Route path="/sign-in" exact component={SignIn} />
         //private route
+        <Route exact path="/KhoK3_" component={KhoK3} rolesAllowed={["admin", "user"]} />
         <Route exact path="/" exact component={StartScreen} rolesAllowed={["admin"]} />
         <Route exact path="/DanhSachChuaDatHang" component={Tables} rolesAllowed={["admin"]} />
         <Main>
