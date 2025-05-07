@@ -131,6 +131,30 @@ const items = [
             </Link>
         ),
     },
+    {
+        key: '3',
+        label: (
+            <Link to="/KhoN16">
+                <span
+                    className="icon"
+                >
+                </span>
+                <span className="label">Kho N16</span>
+            </Link>
+        ),
+    },
+    {
+        key: '4',
+        label: (
+            <Link to="/KhoN19">
+                <span
+                    className="icon"
+                >
+                </span>
+                <span className="label">Kho N19</span>
+            </Link>
+        ),
+    },
 ];
 export default class StartScreen extends Component {
     render() {
@@ -221,7 +245,9 @@ export default class StartScreen extends Component {
                                                         items,
                                                     }}
                                                     placement="bottomLeft"
-
+                                                    style={{
+                                                        maxHeight: 20,
+                                                    }}
                                                 >
                                                     <a onClick={(e) => e.preventDefault()}>
                                                         <Space>
@@ -297,6 +323,68 @@ export default class StartScreen extends Component {
                                                     </div>
                                                 </Link>
                                             </Col>
+                                            <Col xs={24} sm={24} md={12} lg={12} xl={8} >
+                                                <Link to="/KhoN16">
+                                                    <div
+                                                        style={{
+                                                            textAlign: "center",
+                                                            marginBottom: "20px",
+                                                            background: "#FFFFFF",
+                                                            transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+                                                        }}
+                                                        className="hover-container"
+                                                    >
+                                                        {/* Ảnh */}
+                                                        <Image
+                                                            height={200}
+                                                            preview={false} // Tắt chức năng phóng to
+                                                            src="images/portfolio/KhoN16.png"
+                                                            style={{ cursor: "pointer" }} // Hiển thị con trỏ khi hover
+                                                        />
+                                                        {/* Dòng chữ bên dưới */}
+                                                        <Typography.Text style={{
+                                                            display: "block",
+                                                            marginTop: "10px",
+                                                            fontSize: "18px",
+                                                            color: "#555",
+                                                            fontWeight: "bold"
+                                                        }}>
+                                                            Kho N16
+                                                        </Typography.Text>
+                                                    </div>
+                                                </Link>
+                                            </Col>
+                                            <Col xs={24} sm={24} md={12} lg={12} xl={8} >
+                                                <Link to="/KhoN19">
+                                                    <div
+                                                        style={{
+                                                            textAlign: "center",
+                                                            marginBottom: "20px",
+                                                            background: "#FFFFFF",
+                                                            transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+                                                        }}
+                                                        className="hover-container"
+                                                    >
+                                                        {/* Ảnh */}
+                                                        <Image
+                                                            height={200}
+                                                            preview={false} // Tắt chức năng phóng to
+                                                            src="images/portfolio/KhoN19.png"
+                                                            style={{ cursor: "pointer" }} // Hiển thị con trỏ khi hover
+                                                        />
+                                                        {/* Dòng chữ bên dưới */}
+                                                        <Typography.Text style={{
+                                                            display: "block",
+                                                            marginTop: "10px",
+                                                            fontSize: "18px",
+                                                            color: "#555",
+                                                            fontWeight: "bold"
+                                                        }}>
+                                                            Kho N19
+                                                        </Typography.Text>
+                                                    </div>
+                                                </Link>
+                                            </Col>
                                         </Row>
                                     </Col>
                                 </Row>
@@ -348,7 +436,7 @@ export default class StartScreen extends Component {
                                     </Col>
                                 </Row>
                             </div>
-                            <div className="row work">
+                            {/* <div className="row work">
                                 <Row gutter={[24, 0]}>
                                     <Col xs={24} sm={24} md={12} lg={12} xl={6} className="mb-24">
                                         <div className="three columns header-col">
@@ -370,7 +458,7 @@ export default class StartScreen extends Component {
                                         </div>
                                     </Col>
                                 </Row>
-                            </div>
+                            </div> */}
                         </section>
                     </Content>
                 </Layout >

@@ -64,6 +64,46 @@
     /* Đảm bảo padding không làm ảnh hưởng đến kích thước */
 }
 
+.N19 .yellow-background,
+.N19 .green-background,
+.N19 .red-background,
+.N19 .white-background {
+    width: 100%;
+    /* Chiếm hết chiều rộng ô */
+    height: 100%;
+    /* Chiếm hết chiều cao ô */
+    display: flex;
+    /* Sử dụng Flexbox để căn giữa */
+    align-items: center;
+    /* Căn giữa theo chiều dọc */
+    justify-content: center;
+    /* Căn giữa theo chiều ngang */
+    padding: 1.7px;
+    /* Padding cho nội dung */
+    box-sizing: border-box;
+    /* Đảm bảo padding không làm ảnh hưởng đến kích thước */
+}
+
+.N16 .yellow-background,
+.N16 .green-background,
+.N16 .red-background,
+.N16 .white-background {
+    width: 100%;
+    /* Chiếm hết chiều rộng ô */
+    height: 100%;
+    /* Chiếm hết chiều cao ô */
+    display: flex;
+    /* Sử dụng Flexbox để căn giữa */
+    align-items: center;
+    /* Căn giữa theo chiều dọc */
+    justify-content: center;
+    /* Căn giữa theo chiều ngang */
+    padding: 1.7px;
+    /* Padding cho nội dung */
+    box-sizing: border-box;
+    /* Đảm bảo padding không làm ảnh hưởng đến kích thước */
+}
+
 .N1 .yellow-background,
 .N1 .green-background,
 .N1 .red-background,
@@ -129,6 +169,13 @@
     padding: 2.5px 0;
 }
 
+.N19 .ant-table .ant-table-cell {
+    padding: 10px 0;
+}
+
+.N16 .ant-table .ant-table-cell {
+    padding: 6px 0;
+}
 
 .N1 .ant-table .ant-table-cell {
     padding: 1px 10px;
@@ -447,4 +494,15 @@
         opacity: 0;
         /* Mờ dần */
     }
+}
+
+.ant-carousel .slick-dots li button {
+    background: #a5d8ff !important;
+    box-shadow: 0 0 5px #a5d8ff;
+    transition: box-shadow 0.3s;
+}
+
+.ant-carousel .slick-dots li.slick-active button {
+    background: #845ef7 !important;
+    box-shadow: 0 0 10px #845ef7, 0 0 20px #845ef7;
 }

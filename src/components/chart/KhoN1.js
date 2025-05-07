@@ -357,7 +357,7 @@ const KhoN1 = (props) => {
         console.log(x[0]);
         setViTri(filteredResults);
         setTongTon(x[0]);
-        setListData(filteredResults);
+        setListData(inputMaVatTu !== '' ? filteredResults : data);
     };
 
     const handleSubmit = async () => {
@@ -937,6 +937,19 @@ const KhoN1 = (props) => {
                 dataIndex: ['values', index],
                 key: `${key}`,
                 render: (record) => {
+                    if (!record) {
+                        return (
+                            <div
+                                style={{
+                                    transform: 'rotate(90deg)',
+                                    whiteSpace: 'nowrap',
+                                    textAlign: 'center',
+                                    fontSize: '3px',
+                                }}
+                            >
+                            </div>
+                        );
+                    }
                     const className = record.phanTram >= 100
                         ? 'red-background'
                         : record.phanTram > 85 && record.phanTram < 100
@@ -956,6 +969,7 @@ const KhoN1 = (props) => {
                         <div
                             className={`${className} ${isHighlighted || isHighlighted2 ? 'blink-glow' : ''}`}
                             style={{
+                                cursor: "default",
                                 whiteSpace: 'nowrap',
                                 textAlign: 'center',
                                 fontSize: '8px',
@@ -1217,71 +1231,89 @@ const KhoN1 = (props) => {
                                 </div>
                             </Card>
                         </Col> */}
-                        <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24">
+                        <Col xs={24} sm={24} md={12} lg={12} xl={24} className="mb-24" style={{ overflow: "visible" }}>
                             <div className="linechart" style={{ display: 'flex', justifyContent: 'center' }}>
                                 <div >
                                     <Title level={3}>SƠ ĐỒ KHO N1</Title>
                                 </div>
                             </div>
                             <Card bordered={false} className="criclebox h-full" style={{
-                                display: 'flex', justifyContent: 'center', width: "100%", overflow: 'hidden',
+                                display: 'flex', justifyContent: 'center', width: "100%"
+                                , overflow: 'hidden',
+                                transform: 'scale(100%)', //110
+                                transformOrigin: 'top center',
                             }}>
 
-                                <div className="Layout_Kho N1" style={{ flexGrow: 1, marginTop: 10, marginBottom: -10 }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex' }}>
-                                            <div style={{
-                                                display: 'inline-block',
-                                                marginRight: 30
-                                            }}
-                                                ref={tableRef}>
-                                                <Table
-                                                    columns={columns_A}
-                                                    bordered
-                                                    dataSource={result_A}
-                                                    pagination={false}
-                                                    rowKey="key"
-                                                    scroll={{
-                                                        x: 'max-content',
+                                <div className="Layout_Kho N1" style={{ flexGrow: 1, marginTop: 10, marginBottom: -10, overflow: "auto" }}>
+                                    <TransformWrapper
+                                        wheel={{
+                                            step: 0.1, // Tốc độ zoom
+                                            activationKeys: [], // Không yêu cầu phím bổ sung để zoom
+                                            disabled: false, // Kích hoạt thu phóng bằng chuột
+                                            wheelZoomPosition: "mouse", // Thu phóng theo vị trí chuột
+                                        }}
+                                        zoomAnimation={{
+                                            animationType: "easeOut", // Loại hoạt ảnh
+                                            animationTime: 200, // Thời gian hoạt ảnh (ms)
+                                        }}
+                                        minScale={0.9}
+                                    >
+                                        <TransformComponent >
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex' }}>
+                                                    <div style={{
+                                                        display: 'inline-block',
+                                                        marginRight: 30
                                                     }}
+                                                        ref={tableRef}>
+                                                        <Table
+                                                            columns={columns_A}
+                                                            bordered
+                                                            dataSource={result_A}
+                                                            pagination={false}
+                                                            rowKey="key"
+                                                            scroll={{
+                                                                x: 'max-content',
+                                                            }}
 
-                                                />
+                                                        />
+                                                    </div>
+                                                    <div style={{
+                                                        display: 'inline-block',
+                                                        marginRight: 30
+                                                    }}
+                                                        ref={tableRef}>
+                                                        <Table
+                                                            columns={columns_B}
+                                                            bordered
+                                                            dataSource={result_B}
+                                                            pagination={false}
+                                                            rowKey="key"
+                                                        />
+                                                    </div>
+
+                                                </div>
+                                                <Modal
+                                                    title={`Mã vị trí kho: ${selectedMaViTriKho || 'N/A'}`}
+                                                    visible={isModalVisible}
+                                                    onCancel={handleModalClose}
+                                                    onOk={handleModalClose}
+                                                    width={"70%"}
+                                                >
+                                                    <p>Phần trăm: {selectedKey} %</p>
+                                                    <Table
+                                                        columns={columnsMaVT}
+                                                        dataSource={DataMaViTri}
+                                                        pagination={false}
+                                                        // size="middle"
+                                                        scroll={{
+                                                            y: 55 * 8,
+                                                        }}
+                                                    />
+                                                </Modal>
                                             </div>
-                                            <div style={{
-                                                display: 'inline-block',
-                                                marginRight: 30
-                                            }}
-                                                ref={tableRef}>
-                                                <Table
-                                                    columns={columns_B}
-                                                    bordered
-                                                    dataSource={result_B}
-                                                    pagination={false}
-                                                    rowKey="key"
-                                                />
-                                            </div>
-
-                                        </div>
-                                        <Modal
-                                            title={`Mã vị trí kho: ${selectedMaViTriKho || 'N/A'}`}
-                                            visible={isModalVisible}
-                                            onCancel={handleModalClose}
-                                            onOk={handleModalClose}
-                                            width={"70%"}
-                                        >
-                                            <p>Phần trăm: {selectedKey} %</p>
-                                            <Table
-                                                columns={columnsMaVT}
-                                                dataSource={DataMaViTri}
-                                                pagination={false}
-                                                // size="middle"
-                                                scroll={{
-                                                    y: 55 * 8,
-                                                }}
-                                            />
-                                        </Modal>
-                                    </div>
-
+                                        </TransformComponent>
+                                    </TransformWrapper>
                                 </div>
                             </Card>
                         </Col>
@@ -1405,21 +1437,12 @@ const KhoN1 = (props) => {
                                 transformOrigin: 'top center',
                                 justifyContent: 'center'
                             }}>
-                                {/* <div style={{ display: 'flex' }}>
-                  <div className="container" style={{ marginLeft: 600 }}>
-                    <div className="arrow-body"></div>
-                    <div className="arrow-head-r"></div>
-                  </div>
-                  <div className="container" style={{ marginLeft: 650 }}>
-                    <div className="arrow-head-l"></div>
-                    <div className="arrow-body" ></div>
-                  </div>
-                  <div className="container" style={{ marginLeft: 400 }}>
-                    <div className="arrow-body"></div>
-                    <div className="arrow-head-r"></div>
-                  </div>
-                </div> */}
-                                <div className="Layout_Kho N1" style={{ width: '100%', flexGrow: 1, marginTop: 0, marginBottom: -60 }}>
+                                <div className="Layout_Kho N1" style={{
+                                    width: '100%',
+                                    transform: `scale(${100 / scale}%) `,
+                                    transformOrigin: 'top center',
+                                    flexGrow: 1, marginTop: 0, marginBottom: -60
+                                }}>
                                     <TransformWrapper
                                         wheel={{
                                             step: 0.1, // Tốc độ zoom

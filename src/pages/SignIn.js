@@ -99,27 +99,34 @@ const SignIn = () => {
   const onFinish = async (values) => {
     console.log("Success:", values);
     const { email, password } = values;
-    const username = email;
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", { username, password });
-      const { accessToken, role } = response.data;
-      console.log("Login success:", response.data);
+      const response = await axios.post("http://localhost:5000/api/auth/login", {
+        username: email, // API có thể yêu cầu `username` thay vì `email`
+        password
+      });
 
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("role", role);
+      if (response.status === 200) { // Kiểm tra response từ server
+        const { accessToken, role } = response.data;
+        console.log("Login success:", response.data);
 
-      if (role === "admin") {
-        history.push("/");
-      } else if (role === "user") {
-        history.push("/KhoK3");
+        // Lưu thông tin đăng nhập vào localStorage
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("role", role);
+
+        // Điều hướng sang trang QR sau khi lưu token
+        history.push("/qr");
       } else {
-        console.error("Invalid role");
+        console.error("Unexpected response:", response);
       }
     } catch (error) {
-      console.error("Login error:", error.response?.data?.message || error.message);
+      console.error(
+        "Login error:",
+        error.response?.data?.message || "Something went wrong, please try again."
+      );
     }
   };
+
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Luna Moon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+
+        .chartCard {
+            width: 100vw;
+            height: 100vh;
+            background: rgba(54, 162, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chartBox {
+            width: 100vw;
+            padding: 20px;
+            border-radius: 20px;
+            border: solid 3px rgba(54, 162, 235, 1);
+            background: white;
+        }
+
+        .box {
+            /* height: 500px; */
+            max-height: 90vh;
+            overflow-y: scroll;
+        }
+
+        .subbox {
+            height: 800vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chartCard">
+        <div class="chartBox">
+            <div class="box">
+                <div class="subbox">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+    <script>
+        // setup 
+        async function fetchData() {
+            const url = "http://125.212.207.52:5000/khoerp/itemtheotuan";
+            const payload = {
+                nam: 2025
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Lỗi khi gọi API");
+                }
+
+                const data = await response.json();
+                console.log(data)
+                return data;
+            } catch (error) {
+                console.error("Lỗi:", error);
+                return [];
+            }
+        }
+        async function renderChart() {
+            const data = await fetchData();
+            const sortedData = data.sort((a, b) => b.slKeHoach - a.slKeHoach);
+            const filteredData = sortedData
+            // .filter(item => (item.slSanXuat <= item.slKeHoach && item.slDiCont <= item.slSanXuat));
+            // Xử lý dữ liệu để tạo labels và datasets
+            const labels = filteredData.map(item => item.tenSanPham);
+            const slDicont = filteredData.map(item => item.slDiCont || 0);
+            const nhapKho = filteredData.map(item => item.slSanXuat || 0);
+            const keHoach = filteredData.map(item => item.slKeHoach || 0);
+
+            // Cấu hình dữ liệu Chart.js
+            const chartData = {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Đã đi hàng',
+                        data: slDicont,
+                        backgroundColor: '#F39C12',
+                        borderColor: '#F39C12',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Đã sản xuất',
+                        data: nhapKho,
+                        backgroundColor: '#3498DB',
+                        borderColor: '#3498DB',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Kế hoạch',
+                        data: keHoach,
+                        backgroundColor: '#A8DADC',
+                        borderColor: '#A8DADC',
+                        borderWidth: 1
+                    }
+                ]
+            };
+
+            // Cấu hình Chart.js
+            const config = {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Biểu đồ ngang
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true
+                        }
+                    }
+                }
+            };
+
+            // Render biểu đồ
+            const myChart = new Chart(
+                document.getElementById('myChart'),
+                config
+            );
+        }
+
+        renderChart();
+        const chartVersion = document.getElementById('chartVersion');
+        chartVersion.innerText = Chart.version;
+    </script>
+
+</body>
+
+</html>

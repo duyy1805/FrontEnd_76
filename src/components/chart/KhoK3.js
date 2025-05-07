@@ -21,24 +21,94 @@ import ReactApexChart from "react-apexcharts";
 import {
   Typography, Table,
   Tooltip, Modal, Row, Col,
-  Card, Input, Button, Select, Space,
-  List, Breadcrumb, notification, Dropdown
+  Card, Input, Button, Select,
+  List, Breadcrumb, notification, Carousel, Statistic
 } from "antd";
 import {
-  MinusOutlined, SearchOutlined,
-  StarOutlined,
-  TwitterOutlined,
-  FacebookFilled,
+  SearchOutlined, AppstoreOutlined, BankOutlined,
   FullscreenOutlined, FullscreenExitOutlined,
 } from "@ant-design/icons";
+import { PiTent, PiBackpackLight, PiBag } from "react-icons/pi";
 import axios from 'axios';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "../../assets/styles/Style.css"
 import ApexCharts from 'apexcharts'
 import apiConfig from '../../../src/apiConfig.json'
 import { NavLink, Link, useLocation } from "react-router-dom";
-import Countdown from "react-countdown";
+import filePath from '../../assets/code.xlsx';
+import { saveAs } from 'file-saver';
 
+const XLSX = require('xlsx');
+
+
+// const arr_for =
+//   ['A209', 'A210', 'A211', 'A212', 'A311', 'A411', 'A511', 'A611',
+//     'A312', 'A412', 'A512', 'A612', 'A216', 'A316', 'A416',
+//     'A516', 'A616', 'A215', 'A315', 'A415', 'A515', 'A615', 'A220',
+//     'A219', 'A519', 'A520', 'A619', 'A620', 'A141', 'A142', 'A144',
+//     'A241', 'A242', 'A243', 'A244', 'A341', 'A342', 'A343', 'A344',
+//     'A441', 'A442', 'A443', 'A444', 'A541', 'A542', 'A543', 'A544',
+//     'A641', 'A642', 'A643', 'A644', 'G129', 'G229', 'G329', 'G429',
+//     'G529', 'G629', 'G130', 'G230', 'G330', 'G430', 'G530', 'G630',
+//     'G341', 'G441', 'G541', 'G543', 'G259', 'G260', 'G359', 'G360',
+//     'G559', 'G469', 'G569', 'G669', 'G470', 'G570', 'G670', 'G171',
+//     'G271', 'G371', 'G471', 'G571', 'G671', 'G172', 'G272', 'G372',
+//     'G472', 'G572', 'G672', 'G173', 'G273', 'G373', 'G473', 'G573',
+//     'G673', 'G174', 'G274', 'G374', 'G474', 'G574', 'G674', 'G175',
+//     'G275', 'G375', 'F173', 'F375', 'F461', 'F462', 'F463', 'F464',
+//     'F561', 'F562', 'F563', 'F564', 'F661', 'F642', 'F643', 'F644',
+//     'F164', 'F159', 'F149', 'F151', 'F152', 'F251',
+//     'F252', 'F351', 'F352', 'F247', 'F248', 'F347', 'F348', 'F445',
+//     'F446', 'F545', 'F546', 'F547', 'F548', 'F645', 'F646', 'F143',
+//     'F243', 'F343', 'F443', 'F241', 'F123', 'F117', 'F118', 'F119',
+//     'F219', 'F319', 'F419', 'F519', 'F220', 'F320', 'F420', 'F520',
+//     'F307', 'F101', 'F102', 'F201', 'F202', 'A137', 'A138', 'A139',
+//     'A140', 'A237', 'A238', 'A239', 'A240', 'A337', 'A338', 'A339',
+//     'A340', 'B137', 'B138', 'B139', 'B140', 'B237', 'B238', 'B239',
+//     'B240', 'B337', 'B338', 'B339', 'B340', 'C137', 'C138',
+//     'C139', 'C140', 'C237', 'C238', 'C239', 'C240', 'C337', 'C338',
+//     'C339', 'C340', 'D137', 'D138', 'D139', 'D140', 'D237', 'D238',
+//     'D239', 'D240', 'D337', 'D338', 'D339', 'D340', 'E137', 'E138',
+//     'E139', 'E140', 'E237', 'E238', 'E239', 'E240', 'E337', 'E338',
+//     'E339', 'E340', 'F137', 'F138', 'F139', 'F140', 'F237', 'F238',
+//     'F239', 'F240', 'F337', 'F338', 'F339', 'F340', 'G137', 'G138',
+//     'G139', 'G140', 'G237', 'G238', 'G239', 'G240', 'G337', 'G338',
+//     'G339', 'G340', 'H137', 'H138', 'H139', 'H140', 'H237', 'H238',
+//     'H239', 'H240', 'H337', 'H338', 'H339', 'H340', 'I137',
+//     'I138', 'I139', 'I140', 'I237', 'I238', 'I239', 'I240', 'I337',
+//     'I338', 'I339', 'I340', 'J137', 'J138', 'J139', 'J140', 'J237',
+//     'J238', 'J239', 'J240', 'J337', 'J338', 'J339',
+//     "H101", "H102", 'H503', 'H603', 'H604',
+//     'H107', 'H108', 'H207', 'H208', 'H308', 'H408', 'H508', 'H608', 'H309', 'H310', 'H409', 'H410', 'H509', 'H510', 'H609', 'H610',
+//     'H211', 'H311', 'H312', 'H412', 'H511', 'H611', 'H213', 'H214', 'H313', 'H413', 'H414', 'H115', 'H215', 'H216', 'H315', 'H117', 'H118',
+//     'H217', 'H218', 'H318', 'H418', 'H518', 'H618',
+//     'H121', 'H122', 'H221', 'H222', 'H321', 'H322', 'H421', 'H422', 'H521', 'H522', 'H621', 'H622',
+//     'H123', 'H124', 'H423', 'H424', 'H523', 'H524', 'H623', 'H624',
+//     'H133', 'H134', 'H233', 'H234', 'H333', 'H334', 'H135', 'H136', 'H235', 'H236', 'H335', 'H336',
+//     'G133', 'G134', 'G233', 'G234', 'G333', 'G334', 'G135', 'G136', 'G235', 'G236', 'G335', 'G336',
+//     'F133', 'F134', 'F233', 'F234', 'F333', 'F334', 'F135', 'F136', 'F235', 'F236', 'F335', 'F336',
+//     'E133', 'E134', 'E233', 'E234', 'E333', 'E334', 'E135', 'E136', 'E235', 'E236', 'E335', 'E336',
+//     'D133', 'D134', 'D233', 'D234', 'D333', 'D334', 'D135', 'D136', 'D235', 'D236', 'D335', 'D336',
+//     'C133', 'C134', 'C233', 'C234', 'C333', 'C334', 'C135', 'C136', 'C235', 'C236', 'C335', 'C336',
+//     'B133', 'B134', 'B233', 'B234', 'B333', 'B334', 'B135', 'B136', 'B235', 'B236', 'B335', 'B336',
+//     'A133', 'A134', 'A233', 'A234', 'A333', 'A334', 'A135', 'A136', 'A235', 'A236', 'A335', 'A336',
+//     'H220', 'H230', 'H329', 'H330', 'H429', 'H430', 'H529',
+//     'H431', 'H632',
+//     'H145', 'H146', 'H245', 'H246', 'H345', 'H346', 'H445', 'H446', 'H545', 'H546', 'H645', 'H646',
+//     'H151', 'H565', 'H566', 'H665', 'H666',
+//     'H267', 'H268',
+//     'H169', 'H170', 'H269', 'H270', 'H369', 'H370', 'H469', 'H470', 'H569', 'H570', 'H669', 'H670',
+//     'H571', 'H572',
+//     'H273', 'H274', 'H373', 'H374', 'H473', 'H474', 'H573', 'H574', 'H673', 'H674',
+//     'H175', 'H176', 'H275', 'H375', 'H376', 'H475', 'H476', 'H575', 'H576', 'H675', 'H676',
+//     'H279', 'H379', 'H380', 'H479', 'H480',
+//     'F101', 'F102', 'F201', 'F202', 'F105', 'F507', 'F508',
+//     'F117', 'F118', 'F119', 'F219', 'F220', 'F319', 'F320', 'F419',
+//     'F420', 'F519', 'F520',
+//     'F420', 'F519', 'F520',
+//     'F521', 'F123', 'F124', 'F423', 'F424', 'F523', 'F524',
+//     'G129', 'G130', 'G229', 'G230', 'G329', 'G330', 'G429', 'G430', 'G529', 'H530', 'G629', 'G630',
+//     'J340']
 //Gọi API layout kho
 const callAPILayoutKho_BTP = async () => {
   try {
@@ -61,23 +131,7 @@ const callAPILayoutKho_BTP = async () => {
     console.error('Lỗi khi lấy dữ liệu:', error);
   }
 }
-const Completionist = () => <span>You are good to go!</span>;
 
-// Renderer callback with condition
-const renderer = ({ hours, minutes, seconds, completed, restart }) => {
-  if (completed) {
-    // Restart the countdown
-    restart();
-    return <Completionist />;
-  } else {
-    // Render a countdown
-    return (
-      <span>
-        {minutes}:{seconds}
-      </span>
-    );
-  }
-};
 const generateColors = (count) => {
   const colors = [];
   while (colors.length < count) {
@@ -139,15 +193,16 @@ const columnsMaVT = [
     key: 'Ton',
     align: 'center',
   },
-  // {
-  //   title: 'Tuổi tồn',
-  //   dataIndex: 'tuoiTonBTP',
-  //   key: '',
-  //   align: 'center',
-  // },
+  {
+    title: 'Tuổi tồn',
+    dataIndex: 'tuoiTonBTP',
+    key: '',
+    align: 'center',
+  },
 ];
 
 const colorsArray = generateColors(50);
+
 //Fucntion ở đây
 const KhoK3 = (props) => {
   const tableRef = useRef(null);
@@ -163,8 +218,8 @@ const KhoK3 = (props) => {
   const [data, setData] = useState([]);
   const [inputLenhXuatVT, setInputLenhXuatVT] = useState("");
   const [inputMaVatTu, setInputMaVatTu] = useState("");
+  const [inputCcCode, setInputCcCode] = useState("");
   const [viTri, setViTri] = useState([]);
-  const [highlightedCell, setHighlightedCell] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState([]);
   const [selectedChamLC, setSelectedChamLC] = useState([]);
   const [columnsMaVT_, setColumnsMaVT_] = useState(columnsMaVT);
@@ -182,6 +237,7 @@ const KhoK3 = (props) => {
   const [tong, setTong] = useState([]);
   const [chamLC, setChamLC] = useState(undefined);
   const [ngayChamLC, setNgayChamLC] = useState(179)
+  const [wb, setWb] = useState([])
 
   const { pathname } = useLocation();
   const page = pathname.replace("/", "");
@@ -229,17 +285,14 @@ const KhoK3 = (props) => {
       if (tableRef.current) {
         const tableWidth = tableRef.current.offsetWidth;
         const screenWidth = window.innerWidth;
-        console.log("tableWidth", tableWidth);
         const newScale = isFullScreen
           ? tableWidth / (screenWidth - 10)
           : tableWidth / (screenWidth * 0.9);
-        console.log("scale", tableWidth, screenWidth, newScale)
         setScale(newScale);
       }
       if (tableRef_.current) {
         const tableWidth = tableRef_.current.offsetWidth;
         const screenWidth = window.innerWidth;
-        console.log("tableWidth", tableWidth);
         const newScale_ = isFullScreen
           ? tableWidth / (screenWidth - 280)
           : tableWidth / ((screenWidth - 280) * 0.9);
@@ -350,11 +403,104 @@ const KhoK3 = (props) => {
     TongTonTheoMDH: item.TongTonTheoMDH
   }));
 
+  const exportToExcel = (data) => {
+    // Lọc các vị trí có PhanTram > 100
+    const danhSach = data.filter(item => item.PhanTram > 100);
+
+    // Tạo danh sách dòng: mỗi sản phẩm là một dòng, gồm vị trí và tên sản phẩm
+    const rows = [];
+
+    danhSach.forEach(item => {
+      item.ItemCode.forEach(code => {
+        rows.push({
+          ViTri: item.MaViTriKho,
+          TenSanPham: code.Ten_SanPham,
+          MaDonHang: code.Ma_DonHang,
+          Ton: code.Ton,
+        });
+      });
+    });
+
+    // Tạo worksheet và workbook
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "SanPhamVuot100");
+
+    // Xuất file
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const fileName = "SanPham_ViTri_GT100.xlsx";
+    const dataBlob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(dataBlob, fileName);
+  };
 
   const updateHeight = () => {
     setHeight(window.innerHeight);
   };
 
+  const handleFindByCcCode = () => {
+    // Lọc các dòng phù hợp với Ten_SanPham
+    const matchedProduct = wb.find((item) => String(item.ccCode) === String(inputCcCode));
+    if (!matchedProduct) return; // Không tìm thấy sản phẩm tương ứng
+
+    const value = matchedProduct.modelName
+    const matchedRows = data.filter((record) =>
+      record.ItemCode.some((item) => item.Ten_SanPham === value)
+    );
+
+    // Sắp xếp matchedRows trước theo tuoiTonBTP, sau đó theo maViTriKho
+    const sortedMatchedRows = matchedRows.sort((a, b) => {
+      // Lấy tuổi tồn lớn nhất của Ten_SanPham từ từng record
+      const maxA = Math.max(
+        ...a.ItemCode
+          .filter((item) => item.Ten_SanPham === value)
+          .map((item) => item.tuoiTonBTP || 0)
+      );
+
+      const maxB = Math.max(
+        ...b.ItemCode
+          .filter((item) => item.Ten_SanPham === value)
+          .map((item) => item.tuoiTonBTP || 0)
+      );
+
+      // So sánh tuổi tồn
+      if (maxB !== maxA) {
+        return maxB - maxA; // Tuổi tồn giảm dần
+      }
+
+      // Nếu tuổi tồn bằng nhau, so sánh theo mã vị trí kho
+      const [charA, numA] = [a.MaViTriKho[0], parseInt(a.MaViTriKho.slice(1), 10)];
+      const [charB, numB] = [b.MaViTriKho[0], parseInt(b.MaViTriKho.slice(1), 10)];
+
+      // So sánh chữ cái (A, B, C)
+      if (charA !== charB) {
+        return charA.localeCompare(charB); // A < B < C
+      }
+
+      // So sánh số (101, 102, ...)
+      return numA - numB; // Số tăng dần
+    });
+    const mavitri = Object.values(matchedRows).map(item => ({
+      maViTriKho: item.MaViTriKho
+    }));
+    setViTri(mavitri)
+
+    const x = data
+      .map((record) =>
+        record.ItemCode
+          .filter((item) => item.Ten_SanPham === value) // Lọc các phần tử trong ItemCode thỏa mãn điều kiện
+          .map((item) => item.TongTon) // Lấy ra thuộc tính TongTon của các phần tử đã lọc
+      )
+      .flat();
+    setTenSP(value);
+    setTongTon(x[0])
+    setTong({ Ten_SanPham: value, TongTon: x[0] });
+    setChamLC(undefined)
+    setListData(value === undefined ? data : matchedRows)
+  }
   // hàng chậm luân chuyển
 
   //Chọn tên sản phẩm
@@ -413,6 +559,9 @@ const KhoK3 = (props) => {
     setListData(value === undefined ? data : matchedRows)
   }
 
+  const handleInputCcCodeChange = (e) => {
+    setInputCcCode(e.target.value);
+  };
   const handleInputLenhXuatVTChange = (e) => {
     setInputLenhXuatVT(e.target.value);
   };
@@ -468,7 +617,6 @@ const KhoK3 = (props) => {
       const uniqueMaViTriKho = uniqueData.map(item => item.maViTriKho); // Lấy tất cả MaViTriKho từ uniqueData
 
       const listData = data.filter((item) => uniqueMaViTriKho.includes(item.MaViTriKho));
-
       const sortedMatchedRows = listData.sort((a, b) => {
         // Lấy tuổi tồn lớn nhất của Ten_SanPham từ từng record
         const maxA = Math.max(
@@ -544,12 +692,33 @@ const KhoK3 = (props) => {
 
   // Gọi API và xử lý dữ liệu
   useEffect(() => {
-    console.log("pathname", pathname)
     if (pathname === "/KhoK3") {
       // document.documentElement.style.overflow = "hidden";
     } else {
       document.documentElement.style.overflow = "auto"; // Hoặc giá trị mặc định
     }
+    fetch(filePath)
+      .then((response) => response.arrayBuffer())
+      .then((data) => {
+        const workbook = XLSX.read(data, { type: "array" });
+
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Loại bỏ dòng header (dòng đầu tiên) và các dòng trống, chỉ lấy 2 cột đầu
+        const filteredData = jsonData
+          .slice(1) // Bỏ dòng đầu tiên (header)
+          .filter((row) => row.some((cell) => cell !== null && cell !== undefined && cell !== "")) // Loại bỏ dòng trống
+          .map((row) => row.slice(0, 2)); // Lấy 2 cột đầu tiên
+        const processedData = filteredData.map(([ccCode, modelName]) => ({
+          ccCode,
+          modelName,
+        }));
+        setWb(processedData);
+      })
+      .catch((error) => console.error("Lỗi khi đọc file:", error));
+
     const fetchData = async () => {
       try {
         const response = await callAPILayoutKho_BTP();
@@ -566,7 +735,8 @@ const KhoK3 = (props) => {
         const tuoiTonBTP = response.data.map(item => {
           if (!item.ngayNhapBTP || item.ton === 0) return 0;
           const ngayNhap = new Date(item.ngayNhapBTP);
-          return Math.floor((today - ngayNhap) / (1000 * 60 * 60 * 24));
+          const tuoi = Math.floor((today - ngayNhap) / (1000 * 60 * 60 * 24));
+          return tuoi > 180 ? 170 : tuoi;
         });
 
         const tonSanPhamMap = response.data.reduce((acc, item) => {
@@ -631,13 +801,22 @@ const KhoK3 = (props) => {
         }, {});
 
         const finalGroupedData = Object.values(groupedData);
+        const danhSachViTriVuot100 = finalGroupedData.filter(item => item.PhanTram > 100);
+
+        // Tạo danh sách nhóm theo vị trí
+        const viTriVaSanPham = danhSachViTriVuot100.map(item => {
+          return {
+            viTri: item.MaViTriKho,
+            sanPham: item.ItemCode.map(code => code.Ten_SanPham)
+          };
+        });
+        console.log(finalGroupedData)
         setData(finalGroupedData);
         setListData(finalGroupedData);
         setTimeout(() => {
           if (tableRef.current) {
             const tableWidth = tableRef.current.offsetWidth;
             const screenWidth = window.innerWidth;
-            console.log("tableWidth", tableWidth);
             const newScale = isFullScreen
               ? tableWidth / (screenWidth - 10)
               : tableWidth / (screenWidth * 0.9);
@@ -646,7 +825,6 @@ const KhoK3 = (props) => {
           if (tableRef_.current) {
             const tableWidth = tableRef_.current.offsetWidth;
             const screenWidth = window.innerWidth;
-            console.log("tableWidth", tableWidth);
             const newScale_ = isFullScreen
               ? tableWidth / (screenWidth - 280)
               : tableWidth / ((screenWidth - 280) * 0.9);
@@ -670,7 +848,6 @@ const KhoK3 = (props) => {
       // Kiểm tra trong ngày (ví dụ từ 8:00 đến 18:00)
       if (now.getHours() >= 8 && now.getHours() <= 18) {
         fetchData();
-        console.log("reload");
       }
     }, 30 * 60 * 1000); // 30 phút
   }, []);
@@ -710,7 +887,6 @@ const KhoK3 = (props) => {
         const newScale = isFullScreen
           ? (tableWidth) / ((screenWidth - 10))//Hơi đần tý :v
           : (tableWidth) / ((screenWidth * 0.9));
-        console.log("scale", newScale)
         setScale(newScale);
       };
       if (tableRef_.current) {
@@ -719,7 +895,6 @@ const KhoK3 = (props) => {
         const newScale_ = isFullScreen
           ? (tableWidth) / ((screenWidth - 280))//Hơi đần tý :v
           : (tableWidth) / ((screenWidth - 280) * 0.9);
-        console.log("scale_", newScale_)
         setScale_(newScale_);
       }
     };
@@ -798,7 +973,7 @@ const KhoK3 = (props) => {
     },
   ];
 
-
+  const vitrikhocohang = data.filter(item => item.PhanTram !== 0).length;
   useEffect(() => {
 
     ChamLuanchuyen();
@@ -965,7 +1140,7 @@ const KhoK3 = (props) => {
   const countEqual0 = data.filter(item => item.PhanTram == 0).length;
   const countGreaterThan0 = data.filter(item => item.PhanTram > 0 && item.PhanTram <= 85).length;
   const countLessThan100 = data.filter(item => item.PhanTram > 85 && item.PhanTram < 100).length;
-  const countGreaterThan100 = data.filter(item => item.PhanTram >= 100).length;
+  const countGreaterThan100 = data.length - countLessThan100 - countGreaterThan0 - countEqual0;
 
   // Đưa về dạng { label, value }
   const result_Chart = [
@@ -974,7 +1149,6 @@ const KhoK3 = (props) => {
     { label: 'Lớn hơn 85', value: countLessThan100 },
     { label: 'Đầy', value: countGreaterThan100 },
   ];
-
 
   const labels = result_Chart.map(item => item.label);
   const series = result_Chart.map(item => item.value);
@@ -999,6 +1173,137 @@ const KhoK3 = (props) => {
     label: uniqueName,
     value: uniqueName,
   }));
+  function classifyProduct(optionsSelect) {
+    const label = optionsSelect.label.toLowerCase();
+
+    if (
+      label.includes('tent') ||
+      label.includes('shelter') ||
+      label.includes('awning') ||
+      label.includes('flysheet') ||
+      label.includes('base arpenaz') ||
+      (label.includes('mh100') && !label.includes('backpack'))
+    ) {
+      return 'Tent';
+    }
+    // Điều kiện BackPack: nếu chứa từ khóa backpack, bp, backpac
+    else if (
+      label.includes('backpack') ||
+      label.includes('bp ') ||
+      label.includes('backpac')
+    ) {
+      return 'BackPack';
+    }
+    // Điều kiện Balo: nếu chứa từ khóa bag, bumbag, duffel, sac, shoe bag, organizer, store bag, grooming bag
+    else if (
+      label.includes('bag') ||
+      label.includes('bumbag') ||
+      label.includes('duffel') ||
+      label.includes('sac') ||
+      label.includes('shoe bag') ||
+      label.includes('organizer') ||
+      label.includes('store bag') ||
+      label.includes('grooming bag')
+    ) {
+      return 'Bag';
+    }
+    // Các sản phẩm còn lại
+    else {
+      return 'Other';
+    }
+  }
+
+  const categoryOrder = ["Tent", "Bag", "BackPack"];
+
+  const productStockMap = {};
+
+  data.forEach((item) => {
+    item.ItemCode?.forEach((code) => {
+      if (code.Ten_SanPham && !productStockMap[code.Ten_SanPham]) {
+        productStockMap[code.Ten_SanPham] = code.TongTon || 0; // Lấy giá trị TongTon duy nhất
+      }
+    });
+  });
+
+  // Bước 2: Gom nhóm sản phẩm theo loại Tent, BackPack, Bag
+  const categoryCounts = Object.entries(productStockMap).reduce((acc, [productName, totalStock]) => {
+    const category = classifyProduct({ label: productName });
+
+    if (!acc[category]) {
+      acc[category] = { count: 0, totalStock: 0 };
+    }
+
+    acc[category].count += 1;  // Đếm số loại sản phẩm
+    acc[category].totalStock += totalStock; // Cộng tổng tồn từ bảng đã lọc
+
+    return acc;
+  }, {});
+
+  console.log(categoryCounts)
+
+  const sortedCategoryCounts = Object.fromEntries(
+    categoryOrder
+      .map((key) => [key, categoryCounts[key] || 0]) // Đảm bảo đủ tất cả loại, nếu không có thì gán 0
+  );
+
+
+  // Khởi tạo biến đếm tồn cho từng loại và từng mốc thời gian
+  const categoryTotals = {};
+  const usedCapacity = data.reduce((sum, item) => sum + Math.min(item.PhanTram, 100), 0);
+  // Duyệt qua dữ liệu và phân loại tồn theo mốc thời gian
+  const seenProducts = new Set();
+
+  data.forEach(item => {
+    item.ItemCode?.forEach(code => {
+      const productName = code?.Ten_SanPham || "";
+      const ton = code?.TongTon || 0;
+      let age = code?.tuoiTonBTP || 0;
+
+      if (!productName) return; // Bỏ qua nếu không có tên sản phẩm
+
+      // Nếu đã tính sản phẩm này rồi thì bỏ qua
+      if (seenProducts.has(productName)) {
+        return;
+      }
+      seenProducts.add(productName); // Đánh dấu đã duyệt
+
+      // Xử lý tuổi tồn
+      if (age > 180) age = 170;
+
+      const category = classifyProduct({ label: productName });
+      if (category === "Other") return;
+
+      if (!categoryTotals[category]) {
+        categoryTotals[category] = { total: 0, range0_30: 0, range30_90: 0, range90_180: 0 };
+      }
+
+      categoryTotals[category].total += ton;
+      if (age >= 0 && age < 30) categoryTotals[category].range0_30 += ton;
+      else if (age >= 30 && age < 90) categoryTotals[category].range30_90 += ton;
+      else categoryTotals[category].range90_180 += ton;
+    });
+  });
+
+
+  // Tính tỷ lệ tồn theo từng khoảng thời gian
+  const getPercentage = (part, total) => total > 0 ? ((part / total) * 100).toFixed(2) : 0;
+  Object.keys(categoryTotals).forEach(category => {
+  });
+
+  const categoryData = Object.entries(categoryTotals).map(([category, data]) => ({
+    category,
+    total: data.total,
+    range0_30: data.range0_30,
+    range30_90: data.range30_90,
+    range90_180: data.range90_180,
+  }));
+
+  const categoryIcons = {
+    Tent: <PiTent />,
+    BackPack: <PiBackpackLight />,
+    Bag: <PiBag />,
+    Other: <AppstoreOutlined />,
+  };
 
 
   const sortedGroupedData = Object.entries(groupedData).map(([key, values]) => {
@@ -1092,15 +1397,15 @@ const KhoK3 = (props) => {
   const result_H_2 = result_H.slice(20, 40);
   const result_I = createResult(data_I, 'I');
   const result_J = createResult(data_J, 'J');
-  //========================================
 
+  //========================================
   const generateColumn = (keyPrefix) => {
     const columns = Array.from({ length: 6 }, (_, index) => {
-      const key = `${keyPrefix}${6 - index}`;
+      const key = `${keyPrefix}${index + 1}`;
       return {
         title: (
-          <div style={{ transform: 'rotate(90deg)', whiteSpace: 'nowrap', textAlign: 'center', fontSize: '3px' }}>
-            Tầng {6 - index}
+          <div style={{ transform: 'rotate(180deg)', whiteSpace: 'nowrap', textAlign: 'center', fontSize: '3px' }}>
+            Tầng {index + 1}
           </div>
         ),
         children: [
@@ -1113,9 +1418,23 @@ const KhoK3 = (props) => {
             children: [
               {
                 title: null,
-                dataIndex: ['values', (5 - index) * 2 + 1],
+                dataIndex: ['values', (index) * 2],
                 key: `${key}_even`,
                 render: (record) => {
+                  if (!record) {
+                    return (
+                      <div
+                        style={{
+                          transform: 'rotate(90deg)',
+                          whiteSpace: 'nowrap',
+                          textAlign: 'center',
+                          fontSize: '3px',
+                        }}
+                      >
+                      </div>
+                    );
+                  }
+                  // const isInArrFor = arr_for.includes(record.MaViTriKho);
                   const className = record.PhanTram >= 100
                     ? 'red-background'
                     : record.PhanTram > 85 && record.PhanTram < 100
@@ -1127,7 +1446,7 @@ const KhoK3 = (props) => {
                     (item) => item.maViTriKho === record.MaViTriKho
                   );
                   const isHighlighted2 = record.ItemCode.some(
-                    (item) => item.Ten_SanPham === selectedProduct
+                    (item) => (item.Ten_SanPham === selectedProduct || (item.Ten_SanPham === inputCcCode && inputCcCode !== ''))
                   );
                   return (
                     <div
@@ -1150,7 +1469,7 @@ const KhoK3 = (props) => {
               },
               {
                 title: null,
-                dataIndex: ['values', (5 - index) * 2],
+                dataIndex: ['values', index * 2 + 1],
                 key: `${key}_odd`,
                 render: (record) => {
                   const className = record.PhanTram >= 100
@@ -1160,7 +1479,6 @@ const KhoK3 = (props) => {
                       : record.PhanTram > 0 && record.PhanTram <= 85
                         ? 'green-background'
                         : 'white-background';
-
                   const isHighlighted = viTri.some(
                     (item) => item.maViTriKho === record.MaViTriKho
                   );
@@ -1175,8 +1493,6 @@ const KhoK3 = (props) => {
                         whiteSpace: 'nowrap',
                         textAlign: 'center',
                         fontSize: '3px',
-                        // outline: isHighlighted ? '2px solid blue' : 'none',
-                        // border: '1px solid #000',
                       }}
                       onClick={() => handleClick(record.PhanTram, record.ItemCode, record.MaViTriKho)}
                     >
@@ -1232,19 +1548,16 @@ const KhoK3 = (props) => {
         style: {
           fontSize: '16px',
           fontWeight: 'bold',
-          color: '#333'
+          color: '#FFFFFF'
         }
       },
-      // stroke: {
-      //   show: true,  // Hiển thị viền
-      //   width: 0.5,
-      //   colors: ['#000'], // Màu viền đen
-      // },
       labels: labels,
-      colors: ['#ffffff', '#3ca63cc4', '#fcff4dc4', '#db3d3dcc'],
+      colors: ['#ffffff', '#008000', '#FFD700', '#B22222'],
       legend: {
-        // show: false
-        fontSize: '10px'
+        fontSize: '10px',
+        labels: {
+          colors: '#FFFFFF', // ⚡ Đổi màu chữ legend
+        },
       },
       dataLabels: {
         enabled: true,
@@ -1347,6 +1660,9 @@ const KhoK3 = (props) => {
               Kho kinh tế - quốc phòng
             </Breadcrumb.Item>
           </Breadcrumb>
+          {/* <Button type="primary" onClick={() => exportToExcel(data)}>
+            Xuất Excel vượt 100%
+          </Button> */}
           <div className="ant-page-header-heading">
             <span
               className="ant-page-header-heading-title"
@@ -1365,7 +1681,37 @@ const KhoK3 = (props) => {
               sm={24}
               md={12}
               lg={12}
-              xl={12}
+              xl={6}
+              className="mb-24"
+            >
+              <Card bordered={false} className="search_by"
+                style={{ marginBottom: -25 }}
+              >
+                <Row align="middle" justify="space-around" gutter={[24, 0]}>
+                  <Col xs={16}>
+                    <Input
+                      type="text"
+                      placeholder="CONCEPTION NAME"
+                      value={inputCcCode}
+                      onChange={(e) => handleInputCcCodeChange(e)}
+                      prefix={<SearchOutlined style={{ color: '#8c8c8c' }} />}
+                      style={{ borderRadius: '6px' }}
+                    />
+                  </Col>
+                  <Col xs={8}>
+                    <Button type="primary" onClick={handleFindByCcCode} >
+                      Search
+                    </Button>
+                  </Col>
+                </Row>
+              </Card>
+            </Col>
+            <Col
+              xs={24}
+              sm={24}
+              md={12}
+              lg={12}
+              xl={10}
               className="mb-24"
             >
               <Card bordered={false} className="search_by"
@@ -1392,12 +1738,12 @@ const KhoK3 = (props) => {
                       style={{ borderRadius: '6px' }}
                     />
                   </Col>
-                  <Col xs={3}>
+                  <Col xs={4}>
                     <Button type="primary" onClick={handleSubmit} >
                       Search
                     </Button>
                   </Col>
-                  <Col xs={3}>
+                  <Col xs={4}>
                     <Button type="" onClick={handleClear} >
                       Clear
                     </Button>
@@ -1419,32 +1765,153 @@ const KhoK3 = (props) => {
                 />
               </Card>
             </Col>
-            <Button onClick={toggleColumn}>
+            {/* <Button onClick={toggleColumn}>
               {showTuoiTon ? "Hide" : "Show"}
-            </Button>
+            </Button> */}
           </Row>
         )
       }
       {
         isDivVisible && (
           <Row gutter={[24, 0]}>
-            <Col xs={24} sm={24} md={12} lg={12} xl={6} className="mb-24" style={{ marginTop: 12, marginBottom: 12, marginRight: 10 }}>
-              <Card bordered={false} className="criclebox h-full" style={{ height: 160, width: 320, backgroundColor: '#c8c8c8' }}>
-                <ReactApexChart options={config.options} series={config.series} type="pie" width={300} height={150} />
-              </Card>
+            <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24" style={{ marginTop: 12, marginBottom: 12, marginRight: 10 }}>
+              <Carousel autoplay autoplaySpeed={10000}>
+                <div>
+                  <Row gutter={[24, 0]}>
+                    <Col span={6}>
+                      <Card
+                        style={{ backgroundColor: '#01748f' }} // Màu nền xanh nhạt hơn
+                        headStyle={{ borderBottom: 'none' }}
+                        bodyStyle={{ paddingTop: '0', paddingBottom: '0', height: 150 }}
+                      >
+                        <Statistic
+                          title={<span style={{ color: '#FFFFFF' }}>TOTAL WAREHOUSE CAPACITY</span>}
+                          value={"11,900"} suffix=" m³"
+                          prefix={<BankOutlined style={{ color: '#FFFFFF' }} />}
+                          valueStyle={{ color: '#FFFFFF', fontSize: '20px' }}
+                        />
+                        <div style={{ fontSize: '10px', color: '#FFFFFF' }}>TỔNG SỨC CHỨA KHO</div>
+                        <Statistic
+                          value={(usedCapacity * 2.7 / 100).toFixed(0)} suffix=" m³"
+                          prefix={<BankOutlined style={{ color: '#FFFFFF' }} />} // hoặc dùng icon khác nếu muốn
+                          valueStyle={{ color: '#FFFFFF', fontSize: '20px' }}
+                        />
+                        <div style={{ fontSize: '10px', color: '#FFFFFF' }}>TỔNG ĐÃ SỬ DỤNG</div>
+                      </Card>
+                    </Col>
+                    <Col span={6}>
+                      <Card
+                        style={{ backgroundColor: '#01748f' }} // Màu nền xanh nhạt hơn
+                        headStyle={{ borderBottom: 'none' }}
+                        bodyStyle={{ paddingTop: '0', paddingBottom: '0', height: 150 }}
+                      >
+                        <Statistic
+                          title={<span style={{ color: '#FFFFFF' }}>TOTAL WAREHOUSE AREA</span>}
+                          value={"3,400"} suffix=" m²"
+                          prefix={<FullscreenExitOutlined style={{ color: '#FFFFFF' }} />}
+                          valueStyle={{ color: '#FFFFFF', fontSize: '20px' }}
+                        />
+                        <div style={{ fontSize: '10px', color: '#FFFFFF' }}>TỔNG DIỆN TÍCH KHO</div>
+                      </Card>
+                    </Col>
+                    <Col span={6}>
+                      <Card
+                        style={{ backgroundColor: '#01748f' }} // Màu nền xanh nhạt hơn
+                        headStyle={{ borderBottom: 'none' }}
+                        bodyStyle={{ paddingTop: '0', paddingBottom: '0', height: 150 }}
+                      >
+                        <Statistic
+                          title={<span style={{ color: '#FFFFFF' }}>TOTAL RACK POSITION</span>}
+                          value={"4,560"} suffix=" slot"
+                          prefix={<AppstoreOutlined style={{ color: '#FFFFFF' }} />}
+                          valueStyle={{ color: '#FFFFFF', fontSize: '20px' }}
+                        />
+                        <div style={{ fontSize: '10px', color: '#FFFFFF' }}>Số vị trí giá kệ</div>
+                        <Statistic
+                          value={vitrikhocohang} suffix=" slot"
+                          prefix={<AppstoreOutlined style={{ color: '#FFFFFF' }} />}
+                          valueStyle={{ color: '#FFFFFF', fontSize: '20px' }}
+                        />
+                        <div style={{ fontSize: '10px', color: '#FFFFFF' }}>Số vị trí đã sử dụng</div>
+                      </Card>
+                    </Col>
+                    <Col span={6}>
+                      <Card
+                        style={{
+                          backgroundColor: "#01748f",
+                          color: "#FFFFFF",
+                          textAlign: "center",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          height: 150,
+                        }}
+                        headStyle={{ borderBottom: "none" }}
+                      >
+                        <div style={{ fontSize: "16px", fontWeight: "bold", marginBottom: 10 }}>
+                          PRODUCT CATEGORIES
+                        </div>
+                        <div style={{ fontSize: "12px", lineHeight: "1.6" }}>
+                          {Object.entries(sortedCategoryCounts).map(([key, value]) => (
+                            <div key={key} style={{ color: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                              {categoryIcons[key] || <AppstoreOutlined />} <strong>{key}:</strong>{value.count} products | {value.totalStock} items
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
+                    </Col>
+                  </Row>
+                </div>
+                <div>
+                  <Row gutter={[24, 0]}>
+                    {categoryData.map(({ category, total, range0_30, range30_90, range90_180 }) => (
+                      <Col key={category} span={6}>
+                        <Card
+                          style={{
+                            backgroundColor: "#01748f",
+                            color: "#FFFFFF",
+                            textAlign: "center",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            height: 150,
+                            borderRadius: 10,
+                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                          }}
+                          headStyle={{ borderBottom: "none" }}
+                        >
+                          <div style={{ fontSize: "18px", fontWeight: "bold", marginBottom: 10 }}>
+                            {categoryIcons[category] || <AppstoreOutlined />} {category} - {total} items
+                          </div>
+                          <div style={{ fontSize: "14px", lineHeight: "1.6", width: "200px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <strong>0-30 days: </strong> <span> {range0_30} ~ {((range0_30 / total) * 100).toFixed(2)}%</span>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <strong>30-90 days: </strong> <span> {range30_90} ~ {((range30_90 / total) * 100).toFixed(2)}%</span>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <strong>90-180 days: </strong> <span> {range90_180} ~ {((range90_180 / total) * 100).toFixed(2)}%</span>
+                            </div>
+                          </div>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                </div>
+                <div>
+                  <Row gutter={[24, 0]}>
+                    <Col span={6}>
+                      <Card bordered={false} className="criclebox h-full" style={{ height: 160, width: 320, backgroundColor: '#01748f' }}>
+                        <ReactApexChart options={config.options} series={config.series} type="pie" width={300} height={150} />
+                      </Card>
+                    </Col>
+                  </Row>
+                </div>
+              </Carousel>
             </Col>
             {/* <Col xs={24} sm={24} md={12} lg={12} xl={8} className="mb-24" style={{ marginTop: 12, marginBottom: 12 }}>
-              <Card bordered={false} className="criclebox h-full" style={{ height: 200 }}>
-                <ReactApexChart
-                  options={chartOptions}
-                  series={chartSeries}
-                  type="bar"
-                  height={180}
-                />
-              </Card>
-            </Col> */}
-
-            <Col xs={24} sm={24} md={12} lg={12} xl={8} className="mb-24" style={{ marginTop: 12, marginBottom: 12 }}>
               {showTuoiTon && (
                 <Card bordered={false} className="criclebox h-full" style={{ height: 160, width: 510, backgroundColor: '#c8c8c8', display: "flex" }}>
                   <div style={{ display: "flex" }}>
@@ -1488,7 +1955,7 @@ const KhoK3 = (props) => {
                   </div>
                 </Card>
               )}
-            </Col>
+            </Col> */}
             <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24" >
               <div className="linechart" style={{ display: 'flex', justifyContent: 'center', userSelect: 'none', marginTop: -10 }}>
                 <div >
@@ -1497,13 +1964,13 @@ const KhoK3 = (props) => {
               </div>
               <div bordered={false} className="criclebox h-full" style={{
                 // transform: "scale(0.3)",
-                // transformOrigin: 'top left',
+                // transformOrigin: 'top left', 
                 // width: `${125 * scale}%`, overflow: 'hidden',
                 marginTop: -10, marginBottom: -20,
                 display: 'flex', justifyContent: 'center'
               }}>
                 <div style={{
-                  transform: `scale(${96 / scale_}%) `,
+                  transform: `scale(${90 / scale_}%) `,
                   transformOrigin: 'top center',
                 }}>
                   <div className="Layout_Kho" style={{ width: '100%', flexGrow: 1, marginTop: 0 }}>
@@ -1663,7 +2130,7 @@ const KhoK3 = (props) => {
                           </div>
                           <Modal
                             title={`Mã vị trí kho: ${selectedMaViTriKho || 'N/A'}`}
-                            visible={isModalVisible}
+                            open={isModalVisible}
                             onCancel={handleModalClose}
                             onOk={handleModalClose}
                             width={"70%"}
@@ -1807,14 +2274,14 @@ const KhoK3 = (props) => {
                   <div className="Layout_Kho" style={{ width: '100%', flexGrow: 1, marginTop: 10 }}>
                     <TransformWrapper
                       wheel={{
-                        step: 0.1, // Tốc độ zoom
+                        step: 0.05, // Tốc độ zoom
                         activationKeys: [], // Không yêu cầu phím bổ sung để zoom
                         disabled: false, // Kích hoạt thu phóng bằng chuột
                         wheelZoomPosition: "mouse", // Thu phóng theo vị trí chuột
                       }}
                       zoomAnimation={{
                         animationType: "easeOut", // Loại hoạt ảnh
-                        animationTime: 200, // Thời gian hoạt ảnh (ms)
+                        animationTime: 100, // Thời gian hoạt ảnh (ms)
                       }}
                     >
                       <TransformComponent >
@@ -2751,7 +3218,7 @@ const KhoK3 = (props) => {
                             </div>
                             <Modal
                               title={`Mã vị trí kho: ${selectedMaViTriKho || 'N/A'}`}
-                              visible={isModalVisible}
+                              open={isModalVisible}
                               onCancel={handleModalClose}
                               onOk={handleModalClose}
                               width={"70%"}
