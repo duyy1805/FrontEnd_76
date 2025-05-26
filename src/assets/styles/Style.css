@@ -356,13 +356,11 @@
 
 }
 
-
+/* 
 .ant-table-filter-dropdown {
     width: 250px;
-    /* Đặt chiều rộng cố định */
     min-height: 100px;
-    /* Đặt chiều cao tối thiểu */
-}
+} */
 
 .ant-table-filter-dropdown .ant-select {
     width: 100%;

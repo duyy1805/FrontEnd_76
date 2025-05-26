@@ -20,7 +20,7 @@ import "antd/dist/antd.css";
 import "./assets/styles/main.css";
 import "./assets/styles/responsive.css";
 import PrivateRoute from "./components/PrivateRoute";
-
+import Uniform from "./pages/Uniform";
 // Tạo PrivateRoute để bảo vệ các route
 
 
@@ -31,16 +31,16 @@ function App() {
         <Route path="/pallet" exact component={QRCodeScanner} />
         <Route path="/sign-up" exact component={SignUp} />
         <Route path="/sign-in" exact component={SignIn} />
+        <Route path="/uniform" exact component={Uniform} />
         {/* private route */}
         <Route exact path="/KhoK3_" component={KhoK3} rolesAllowed={["admin", "user"]} />
-        <Route exact path="/" exact component={StartScreen} rolesAllowed={["admin"]} />
+        <Route exact path="/" component={StartScreen} rolesAllowed={["admin"]} />
         <Route exact path="/DanhSachChuaDatHang" component={Tables} rolesAllowed={["admin"]} />
         <Route exact path="/ltd" component={LenhTuDong} rolesAllowed={["admin", "user"]} />
         <Route exact path="/qr" component={Qr} rolesAllowed={["admin", "user"]} />
         <Main>
           {/* PrivateRoute bảo vệ các route dành cho admin */}
           <Route exact path="/Dashboard" component={Home} rolesAllowed={["admin"]} />
-
           {/* Route dành cho user */}
           <Route exact path="/KhoK3" component={KhoK3} rolesAllowed={["admin", "user"]} />
           <Route exact path="/KhoN1" component={KhoN1} rolesAllowed={["admin", "user"]} />

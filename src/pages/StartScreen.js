@@ -39,19 +39,19 @@ const template = [
             data-v-4ebdc598=""
             d="M3 4C3 3.44772 3.44772 3 4 3H16C16.5523 3 17 3.44772 17 4V6C17 6.55228 16.5523 7 16 7H4C3.44772 7 3 6.55228 3 6V4Z"
             fill="#111827"
-            className="fill-muted"
+        // className="fill-muted"
         ></path>
         <path
             data-v-4ebdc598=""
             d="M3 10C3 9.44771 3.44772 9 4 9H10C10.5523 9 11 9.44771 11 10V16C11 16.5523 10.5523 17 10 17H4C3.44772 17 3 16.5523 3 16V10Z"
             fill="#111827"
-            className="fill-muted"
+        // className="fill-muted"
         ></path>
         <path
             data-v-4ebdc598=""
             d="M14 9C13.4477 9 13 9.44771 13 10V16C13 16.5523 13.4477 17 14 17H16C16.5523 17 17 16.5523 17 16V10C17 9.44771 16.5523 9 16 9H14Z"
             fill="#111827"
-            className="fill-muted"
+        // className="fill-muted"
         ></path>
     </svg>,
 ];
@@ -172,7 +172,7 @@ export default class StartScreen extends Component {
                         <div>
                             <Image
                                 height={50}
-                                preview={false} // Tắt chức năng phóng to
+                                preview={false}
                                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlE5WqC5kYtMhSvd07l4G6ClN9VlypQnrzzg&s"
                                 style={{ cursor: "pointer" }} // Hiển thị con trỏ khi hover
                             />
@@ -185,19 +185,19 @@ export default class StartScreen extends Component {
                                 <Menu.Item key="1">
                                     <Link to="/">
                                         {template}
-                                        <span> Trang chủ</span>
+                                        <span> Layout kho</span>
                                     </Link>
                                 </Menu.Item>
-                                {/* <Menu.Item key="2">
-                                    <Link to="/profile">
+                                <Menu.Item key="2">
+                                    <Link to="/Uniform">
                                         {profile}
-                                        <span>Profile</span>
+                                        <span>Nhân sự</span>
                                     </Link>
-                                </Menu.Item> */}
+                                </Menu.Item>
                                 <Menu.Item key="3">
-                                    <Link to="/sign-up">
+                                    <Link to="/DanhSachChuaDatHang">
                                         {signup}
-                                        <span> Sign Up</span>
+                                        <span> Danh sách chưa đặt hàng</span>
                                     </Link>
                                 </Menu.Item>
                                 <Menu.Item key="4">
@@ -208,17 +208,6 @@ export default class StartScreen extends Component {
                                 </Menu.Item>
                             </Menu>
                         </div>
-                        {/* <div className="header-col header-brand">
-                            <Link to="/sign-in"
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center"
-                                }}>
-                                {profile}
-                                <span> Sign In</span>
-                            </Link>
-                        </div> */}
                     </Header>
                     <Content  >
                         <section id="resume"
@@ -389,7 +378,7 @@ export default class StartScreen extends Component {
                                     </Col>
                                 </Row>
                             </div>
-
+                            {/*
                             <div className="row work">
                                 <Row gutter={[24, 0]}>
                                     <Col xs={24} sm={24} md={12} lg={12} xl={6} >
@@ -412,14 +401,14 @@ export default class StartScreen extends Component {
                                                         }}
                                                         className="hover-container"
                                                     >
-                                                        {/* Ảnh */}
+                                                        
                                                         <Image
                                                             height={200}
                                                             preview={false} // Tắt chức năng phóng to
                                                             src="images/portfolio/DanhSachChuaDatHang.png"
                                                             style={{ cursor: "pointer" }} // Hiển thị con trỏ khi hover
                                                         />
-                                                        {/* Dòng chữ bên dưới */}
+
                                                         <Typography.Text style={{
                                                             display: "block",
                                                             marginTop: "10px",
@@ -436,29 +425,7 @@ export default class StartScreen extends Component {
                                     </Col>
                                 </Row>
                             </div>
-                            {/* <div className="row work">
-                                <Row gutter={[24, 0]}>
-                                    <Col xs={24} sm={24} md={12} lg={12} xl={6} className="mb-24">
-                                        <div className="three columns header-col">
-                                            <h1>
-                                                <span>Something</span>
-                                            </h1>
-                                        </div>
-                                    </Col>
-                                    <Col xs={24} sm={24} md={12} lg={12} xl={18} className="mb-24">
-                                        <div className="nine columns main-col">
-                                            <div key="Awesome Design Studio">
-                                                <h3>Nội dung chưa xác định</h3>
-                                                <p className="info">
-                                                    z76
-                                                    <span>&bull;</span> <em className="date">March 2018 - Present</em>
-                                                </p>
-                                                <p>Coming soon</p>
-                                            </div>
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </div> */}
+                            */}
                         </section>
                     </Content>
                 </Layout >
